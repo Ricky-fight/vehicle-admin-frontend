@@ -60,26 +60,26 @@
           </template>
         </el-table-column>
       </el-table>
-      <div style="margin-bottom: 8px"/>
+      <div style="margin-bottom: 8px" />
       <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
         :current-page="currentPage"
         :page-sizes="[10, 20, 50, 100]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="list.length"
-        align="right">
-      </el-pagination>
+        align="right"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
     </el-card>
   </div>
 </template>
 
 <script>
 import { getList } from '@/api/table'
-import col from "element-ui/packages/col";
+import col from 'element-ui/packages/col'
 function min(a, b) {
-  return a<b?a:b;
+  return a < b ? a : b
 }
 export default {
   filters: {
@@ -115,8 +115,7 @@ export default {
         this.list = response.data.items
         this.pageSize = 10 // TODO:可选择的分页条数
 
-
-        this.renderList = this.list.slice(0,min(this.pageSize,this.list.length))
+        this.renderList = this.list.slice(0, min(this.pageSize, this.list.length))
         this.listLoading = false
         console.log(this.renderList)
       })
@@ -136,13 +135,13 @@ export default {
       this.pageSize = val
       this.currentPage = 0
       this.handleCurrentChange(0)
-      console.log(`每页 ${val} 条`);
-      console.log(`pageSize = ${this.pageSize}`);
+      console.log(`每页 ${val} 条`)
+      console.log(`pageSize = ${this.pageSize}`)
     },
     handleCurrentChange(val) {
-      let index = val===0?val:val - 1
-      this.renderList = this.list.slice(index*this.pageSize,min((index+1)*this.pageSize,this.list.length))
-      console.log(`当前页: ${val}`);
+      const index = val === 0 ? val : val - 1
+      this.renderList = this.list.slice(index * this.pageSize, min((index + 1) * this.pageSize, this.list.length))
+      console.log(`当前页: ${val}`)
     }
 
   }

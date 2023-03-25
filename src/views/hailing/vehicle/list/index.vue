@@ -1,7 +1,8 @@
 <template>
   <div class="app-container">
     <el-card class="box-card">
-      <el-form :inline="true" :model="queryForm" class="form-inline">
+      <el-row type="flex" justify="end">
+        <el-form :inline="true" :model="queryForm" class="form-inline">
         <el-form-item label="车型">
           <el-input v-model="queryForm.vehicleSeries" placeholder="车型" />
         </el-form-item>
@@ -12,20 +13,31 @@
             <el-option label="灰" value="gray" />
           </el-select>
         </el-form-item>
-        <el-form-item label="车架号" >
+        <el-form-item label="状态">
+          <el-select v-model="queryForm.status" placeholder="车辆状态">
+            <el-option label="出车" value="1" />
+            <el-option label="收车" value="0" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="车架号">
           <el-input v-model="queryForm.vin" placeholder="车架号" />
         </el-form-item>
-        <el-form-item label="车牌号" >
+        <el-form-item label="车牌号">
           <el-input v-model="queryForm.licence" placeholder="车牌号" />
         </el-form-item>
-        <el-form-item label="司机" >
+        <el-form-item label="司机">
           <el-input v-model="queryForm.driverName" placeholder="司机姓名" />
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit">查询</el-button>
-          <el-button @click="onReset">重置</el-button>
-        </el-form-item>
       </el-form>
+      </el-row>
+      <el-row type="flex" justify="end">
+          <el-col >
+            <el-button type="primary" @click="onSubmit">查询</el-button>
+          </el-col>
+          <el-col >
+            <el-button @click="onReset">重置</el-button>
+          </el-col>
+      </el-row>
     </el-card>
     <el-card class="box-card">
       <el-table
@@ -58,7 +70,7 @@
             {{ scope.row.driverName }}
           </template>
         </el-table-column>
-        <el-table-column label="品牌型号" width="250" align="center">
+        <el-table-column label="品牌型号" align="center">
           <template slot-scope="scope">
             {{ scope.row.vehicleSeries }}
           </template>
@@ -78,33 +90,37 @@
             <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="center" prop="created_at" label="Display_time" width="200">
-          <template slot-scope="scope">
-            <i class="el-icon-time" />
-            <span>{{ scope.row.display_time }}</span>
-          </template>
+        <el-table-column label="操作" width="110" align="center">
+          <el-link type="primary" style="margin-right: 5px">更新</el-link>
+          <el-link type="danger">删除</el-link>
         </el-table-column>
+        <!--        <el-table-column align="center" prop="created_at" label="Display_time" width="200">-->
+        <!--          <template slot-scope="scope">-->
+        <!--            <i class="el-icon-time" />-->
+        <!--            <span>{{ scope.row.display_time }}</span>-->
+        <!--          </template>-->
+        <!--        </el-table-column>-->
       </el-table>
-      <div style="margin-bottom: 8px"/>
+      <div style="margin-bottom: 8px" />
       <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
         :current-page="currentPage"
         :page-sizes="[10, 20, 50, 100]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="list.length"
-        align="right">
-      </el-pagination>
+        align="right"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
     </el-card>
   </div>
 </template>
 
 <script>
 import { getList } from '@/api/table'
-import col from "element-ui/packages/col";
+import col from 'element-ui/packages/col'
 function min(a, b) {
-  return a<b?a:b;
+  return a < b ? a : b
 }
 export default {
   filters: {
@@ -143,8 +159,7 @@ export default {
         this.list = response.data.items
         this.pageSize = 10 // TODO:可选择的分页条数
 
-
-        this.renderList = this.list.slice(0,min(this.pageSize,this.list.length))
+        this.renderList = this.list.slice(0, min(this.pageSize, this.list.length))
         this.listLoading = false
         console.log(this.renderList)
       })
@@ -164,13 +179,13 @@ export default {
       this.pageSize = val
       this.currentPage = 0
       this.handleCurrentChange(0)
-      console.log(`每页 ${val} 条`);
-      console.log(`pageSize = ${this.pageSize}`);
+      console.log(`每页 ${val} 条`)
+      console.log(`pageSize = ${this.pageSize}`)
     },
     handleCurrentChange(val) {
-      let index = val===0?val:val - 1
-      this.renderList = this.list.slice(index*this.pageSize,min((index+1)*this.pageSize,this.list.length))
-      console.log(`当前页: ${val}`);
+      const index = val === 0 ? val : val - 1
+      this.renderList = this.list.slice(index * this.pageSize, min((index + 1) * this.pageSize, this.list.length))
+      console.log(`当前页: ${val}`)
     }
 
   }
@@ -186,4 +201,7 @@ el-row{
   border-radius: 10px;
   margin-bottom: 10px;
 }
+/*.el-col {*/
+/*  margin-left: 4px;*/
+/*}*/
 </style>
