@@ -1,43 +1,62 @@
 <template>
   <div class="app-container">
     <el-card class="box-card">
-      <el-row type="flex" justify="end">
-        <el-form :inline="true" :model="queryForm" class="form-inline">
-        <el-form-item label="车型">
-          <el-input v-model="queryForm.vehicleSeries" placeholder="车型" />
+      <!--      <el-row type="flex" justify="end">-->
+      <el-form :model="queryForm" class="" label-width="75px" clearable>
+        <el-row justify="end">
+          <el-col span="6">
+            <el-form-item label="车型">
+              <el-cascader
+                v-model="queryForm.vehicleSeries"
+                :options="vehicleSeriesOptions"
+                @change="handleVehicleSeriesChange"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col span="6">
+            <el-form-item label="颜色">
+              <el-select v-model="queryForm.color" placeholder="车身颜色">
+                <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col span="6">
+            <el-form-item label="状态">
+              <el-select v-model="queryForm.status" placeholder="车辆状态">
+                <el-option v-for="(statusCode, statusLabel) in statusMap" :key="statusCode" :label="statusCode" :value="statusLabel" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col span="6">
+            <el-form-item label="司机">
+              <el-input v-model="queryForm.driverName" placeholder="司机姓名" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col span="12">
+            <el-form-item label="车架号">
+              <el-input v-model="queryForm.vin" placeholder="车架号" />
+            </el-form-item>
+          </el-col>
+          <el-col span="12">
+            <el-form-item label="车牌号">
+              <el-input v-model="queryForm.licence" placeholder="车牌号" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <el-form label-width="75px" inline align="right">
+        <el-form-item class="form-btns">
+          <el-button type="primary" @click="onSubmit">查询</el-button>
         </el-form-item>
-        <el-form-item label="颜色">
-          <el-select v-model="queryForm.color" placeholder="车身颜色">
-            <el-option label="黑" value="black" />
-            <el-option label="白" value="white" />
-            <el-option label="灰" value="gray" />
-          </el-select>
+        <el-form-item class="form-btns">
+          <el-button @click="onReset">重置</el-button>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="queryForm.status" placeholder="车辆状态">
-            <el-option label="出车" value="1" />
-            <el-option label="收车" value="0" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="车架号">
-          <el-input v-model="queryForm.vin" placeholder="车架号" />
-        </el-form-item>
-        <el-form-item label="车牌号">
-          <el-input v-model="queryForm.licence" placeholder="车牌号" />
-        </el-form-item>
-        <el-form-item label="司机">
-          <el-input v-model="queryForm.driverName" placeholder="司机姓名" />
+        <el-form-item class="form-btns">
+          <el-button type="primary" @click="onCreate">新增</el-button>
         </el-form-item>
       </el-form>
-      </el-row>
-      <el-row type="flex" justify="end">
-          <el-col >
-            <el-button type="primary" @click="onSubmit">查询</el-button>
-          </el-col>
-          <el-col >
-            <el-button @click="onReset">重置</el-button>
-          </el-col>
-      </el-row>
     </el-card>
     <el-card class="box-card">
       <el-table
@@ -50,7 +69,7 @@
         stripe
         highlight-current-row
       >
-        <el-table-column align="center" label="车牌号" width="200">
+        <el-table-column label="车牌号" align="center" width="200">
           <template slot-scope="scope">
             {{ scope.row.licence }}
           </template>
@@ -77,12 +96,12 @@
         </el-table-column>
         <el-table-column label="行驶证注册日期" width="250" align="center">
           <template slot-scope="scope">
-            {{ scope.row.vehicleSeries }}
+            {{ scope.row.registerDate }}
           </template>
         </el-table-column>
         <el-table-column label="检检有效期" width="250" align="center">
           <template slot-scope="scope">
-            {{ scope.row.vehicleSeries }}
+            {{ scope.row.inspectionExpired }}
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="状态" width="110" align="center">
@@ -91,8 +110,10 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="110" align="center">
-          <el-link type="primary" style="margin-right: 5px">更新</el-link>
-          <el-link type="danger">删除</el-link>
+          <template>
+            <el-link type="primary" style="margin-right: 5px">更新</el-link>
+            <el-link type="danger">删除</el-link>
+          </template>
         </el-table-column>
         <!--        <el-table-column align="center" prop="created_at" label="Display_time" width="200">-->
         <!--          <template slot-scope="scope">-->
@@ -113,12 +134,78 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
+    <el-dialog
+      title="新建车辆"
+      :visible.sync="dialogVisible"
+      width="50%"
+      :before-close="handleClose"
+    >
+      <el-form :model="createForm">
+        <el-row>
+          <el-col span="8">
+            <el-form-item label="车牌号" label-width="75px">
+              <el-input v-model.trim="createForm.licence" />
+            </el-form-item>
+          </el-col>
+          <el-col span="8">
+            <el-form-item label="车型" label-width="75px">
+              <el-cascader
+                v-model="createForm.vehicleSeries"
+                placeholder="选择车型"
+                :options="vehicleSeriesOptions"
+                @change="handleVehicleSeriesChange"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col span="8">
+            <el-form-item label="车架号" label-width="75px">
+              <el-input v-model.trim="createForm.vin" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col span="8">
+            <el-form-item label="颜色">
+              <el-select v-model="queryForm.color" placeholder="选择颜色">
+                <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col span="8">
+            <el-form-item label="行驶证注册日期">
+              <el-date-picker
+                v-model="createForm.registerDate"
+                align="right"
+                type="date"
+                placeholder="选择日期"
+                :picker-options="pickerOptions1"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col span="8">
+            <el-form-item label="检验有效期">
+              <el-date-picker
+                v-model="queryForm.inspectionExpired"
+                align="right"
+                type="date"
+                placeholder="选择日期"
+                :picker-options="pickerOptions2"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getList } from '@/api/table'
-import col from 'element-ui/packages/col'
+import { getVehicleList } from '@/api/hailing/vehicle'
 function min(a, b) {
   return a < b ? a : b
 }
@@ -139,23 +226,91 @@ export default {
       list: null,
       listLoading: true,
       queryForm: {
-        vehicleSeries: '',
+        vehicleSeries: [],
         color: '',
         vin: '',
         licence: '',
         driverName: ''
       },
+      createForm: {
+        vehicleSeries: [],
+        color: '',
+        vin: '',
+        licence: '',
+        driverName: '',
+        inspectionExpired: '',
+        registerDate: ''
+      },
+      vehicleSeriesOptions: [],
+      pickerOptions1: {
+        shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            picker.$emit('pick', new Date())
+          }
+        }, {
+          text: '昨天',
+          onClick(picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24)
+            picker.$emit('pick', date)
+          }
+        }, {
+          text: '一周前',
+          onClick(picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', date)
+          }
+        }]
+      },
+      pickerOptions2: {
+        shortcuts: [{
+          text: '一年后',
+          onClick(picker) {
+            let d = new Date()
+            d.setFullYear(d.getFullYear()+1)
+            picker.$emit('pick', new Date() + 3600 * 1000 * 24 * d)
+          }
+        }, {
+          text: '昨天',
+          onClick(picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24)
+            picker.$emit('pick', date)
+          }
+        }, {
+          text: '一周前',
+          onClick(picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', date)
+          }
+        }]
+      },
+      statusMap: {
+        0: '收车',
+        1: '出车'
+      },
+      colorMap: {
+        black: '黑',
+        white: '白',
+        gray: '灰'
+      },
+
       pageSize: null,
-      currentPage: null
+      currentPage: null,
+      dialogVisible: false
     }
   },
   created() {
     this.fetchData()
+    this.fetchVehicleSeries()
   },
   methods: {
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
+      getVehicleList().then(response => {
         this.list = response.data.items
         this.pageSize = 10 // TODO:可选择的分页条数
 
@@ -163,6 +318,9 @@ export default {
         this.listLoading = false
         console.log(this.renderList)
       })
+    },
+    fetchVehicleSeries() {
+
     },
     onSubmit() {
       console.log('submit!')
@@ -186,22 +344,33 @@ export default {
       const index = val === 0 ? val : val - 1
       this.renderList = this.list.slice(index * this.pageSize, min((index + 1) * this.pageSize, this.list.length))
       console.log(`当前页: ${val}`)
+    },
+    onCreate() {
+      this.dialogVisible = true
+    },
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+          done()
+        })
+        .catch(_ => {})
+    },
+    handleVehicleSeriesChange(value) {
+      console.log(value)
     }
-
   }
 }
 </script>
 <style>
-el-row{
-  border-radius: 30px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  background: #1f2d3d;
-}
 .box-card {
   border-radius: 10px;
   margin-bottom: 10px;
 }
-/*.el-col {*/
-/*  margin-left: 4px;*/
-/*}*/
+.form-btns {
+  margin-left: 10px;
+}
+.el-form--inline .el-form-item{
+  margin-right: 0;
+}
+
 </style>
