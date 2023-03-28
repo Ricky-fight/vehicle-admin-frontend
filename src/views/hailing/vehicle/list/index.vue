@@ -109,8 +109,8 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="110" align="center">
-          <template>
-            <el-link type="primary" style="margin-right: 5px">更新</el-link>
+          <template slot-scope="scope">
+            <el-link type="primary" style="margin-right: 5px" @click="(event) => onUpdate(scope.row, event)">更新</el-link>
             <el-link type="danger">删除</el-link>
           </template>
         </el-table-column>
@@ -133,8 +133,252 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
-
-
+      <el-dialog
+        title="新建车辆"
+        :visible.sync="dialogVisible"
+        width="50%"
+        :before-close="handleClose"
+      >
+        <el-form :model="createForm">
+          <el-row>
+            <el-col span="6">
+              <el-form-item label="车牌号" label-width="75px">
+                <el-input v-model.trim="createForm.licence" clearable />
+              </el-form-item>
+            </el-col>
+            <el-col span="8">
+              <el-form-item label="车型" label-width="75px">
+                <el-cascader
+                  v-model="createForm.vehicleSeries"
+                  placeholder="选择车型"
+                  :options="vehicleSeriesOptions"
+                  @change="handleVehicleSeriesChange"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col span="2">
+              <el-link type="primary" @click="onCreateVehicleSeries">新增</el-link>
+            </el-col>
+            <el-col span="8">
+              <el-form-item label="车架号" label-width="75px">
+                <el-input v-model.trim="createForm.vin" clearable />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col span="8">
+              <el-form-item label="颜色" label-width="75px">
+                <el-select v-model="queryForm.color" placeholder="选择颜色">
+                  <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col span="12">
+              <el-form-item label="行驶证注册日期">
+                <el-date-picker
+                  v-model="createForm.registerDate"
+                  align="right"
+                  type="date"
+                  placeholder="选择日期"
+                  :picker-options="pickerOptions1"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col span="12">
+              <el-form-item label="检验有效期">
+                <el-date-picker
+                  v-model="queryForm.inspectionExpired"
+                  align="right"
+                  type="date"
+                  placeholder="选择日期"
+                  :picker-options="pickerOptions2"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        </span>
+        <el-dialog
+          title="新建车型"
+          :visible.sync="dialog2Visible"
+          width="50%"
+          :before-close="handle2Close"
+          append-to-body
+        >
+          <el-form :model="createVehicleSeriesForm">
+            <el-row>
+              <el-col span="12">
+                <el-form-item label="品牌" label-width="100px">
+                  <el-input v-model.trim="createVehicleSeriesForm.brand" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col span="12">
+                <el-form-item label="车系" label-width="100px">
+                  <el-input v-model.trim="createVehicleSeriesForm.vehicleSeries" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col span="8">
+                <el-form-item label="基础押金" label-width="100px">
+                  <el-input v-model="createVehicleSeriesForm.baseDeposit" placeholder="输入金额" clearable>
+                    <template slot="append">元</template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col span="8">
+                <el-form-item label="基础月付租金" label-width="100px">
+                  <el-input v-model="createVehicleSeriesForm.baseMonthlyRent" placeholder="输入金额" clearable>
+                    <template slot="append">元</template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col span="8">
+                <el-form-item label="基础周付租金" label-width="100px">
+                  <el-input v-model="createVehicleSeriesForm.baseWeeklyRent" placeholder="输入金额" clearable>
+                    <template slot="append">元</template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="dialog2Visible = false">取 消</el-button>
+            <el-button type="primary" @click="onSubmitCreateVehicleSeries">确 定</el-button>
+          </span>
+        </el-dialog>
+      </el-dialog>
+      <el-dialog
+        title="更新车辆"
+        :visible.sync="dialog3Visible"
+        width="50%"
+        :before-close="handleClose"
+      >
+        <el-form :model="updateForm">
+          <el-row>
+            <el-col span="6">
+              <el-form-item label="车牌号" label-width="75px">
+                <el-input v-model.trim="updateForm.licence" clearable />
+              </el-form-item>
+            </el-col>
+            <el-col span="8">
+              <el-form-item label="车型" label-width="75px">
+                <el-cascader
+                  v-model="updateForm.vehicleSeries"
+                  placeholder="选择车型"
+                  :options="vehicleSeriesOptions"
+                  @change="handleVehicleSeriesChange"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col span="2">
+              <el-link type="primary" @click="onCreateVehicleSeries">新增</el-link>
+            </el-col>
+            <el-col span="8">
+              <el-form-item label="车架号" label-width="75px">
+                <el-input v-model.trim="updateForm.vin" clearable />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col span="8">
+              <el-form-item label="颜色" label-width="75px">
+                <el-select v-model="updateForm.color" placeholder="选择颜色">
+                  <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col span="8">
+              <el-form-item label="ID" label-width="75px">
+                <el-input v-model="updateForm.id" placeholder="系统内部序号" disabled></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col span="12">
+              <el-form-item label="行驶证注册日期">
+                <el-date-picker
+                  v-model="updateForm.registerDate"
+                  align="right"
+                  type="date"
+                  placeholder="选择日期"
+                  :picker-options="pickerOptions1"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col span="12">
+              <el-form-item label="检验有效期">
+                <el-date-picker
+                  v-model="updateForm.inspectionExpired"
+                  align="right"
+                  type="date"
+                  placeholder="选择日期"
+                  :picker-options="pickerOptions2"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialog3Visible = false">取 消</el-button>
+          <el-button type="primary" @click="dialog3Visible = false">确 定</el-button>
+        </span>
+        <el-dialog
+          title="新建车型"
+          :visible.sync="dialog4Visible"
+          width="50%"
+          :before-close="handleClose"
+          append-to-body
+        >
+          <el-form :model="createVehicleSeriesForm">
+            <el-row>
+              <el-col span="12">
+                <el-form-item label="品牌" label-width="100px">
+                  <el-input v-model.trim="createVehicleSeriesForm.brand" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col span="12">
+                <el-form-item label="车系" label-width="100px">
+                  <el-input v-model.trim="createVehicleSeriesForm.vehicleSeries" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col span="8">
+                <el-form-item label="基础押金" label-width="100px">
+                  <el-input v-model="createVehicleSeriesForm.baseDeposit" placeholder="输入金额" clearable>
+                    <template slot="append">元</template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col span="8">
+                <el-form-item label="基础月付租金" label-width="100px">
+                  <el-input v-model="createVehicleSeriesForm.baseMonthlyRent" placeholder="输入金额" clearable>
+                    <template slot="append">元</template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col span="8">
+                <el-form-item label="基础周付租金" label-width="100px">
+                  <el-input v-model="createVehicleSeriesForm.baseWeeklyRent" placeholder="输入金额" clearable>
+                    <template slot="append">元</template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="dialog4Visible = false">取 消</el-button>
+            <el-button type="primary" @click="onSubmitCreateVehicleSeries">确 定</el-button>
+          </span>
+        </el-dialog>
+      </el-dialog>
+      <el-dialog :visible.sync="dialog3Visible"></el-dialog>
   </div>
 </template>
 
@@ -166,9 +410,73 @@ export default {
         licence: '',
         driverName: ''
       },
-
+      createForm: {
+        vehicleSeries: [],
+        color: '',
+        vin: '',
+        licence: '',
+        driverName: '',
+        inspectionExpired: '',
+        registerDate: ''
+      },
+      updateForm: {
+        id: '',
+        vehicleSeries: [],
+        color: '',
+        vin: '',
+        licence: '',
+        driverName: '',
+        inspectionExpired: '',
+        registerDate: ''
+      },
       vehicleSeriesOptions: [],
-
+      pickerOptions1: {
+        shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            picker.$emit('pick', new Date())
+          }
+        }, {
+          text: '昨天',
+          onClick(picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24)
+            picker.$emit('pick', date)
+          }
+        }, {
+          text: '一周前',
+          onClick(picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', date)
+          }
+        }]
+      },
+      pickerOptions2: {
+        shortcuts: [{
+          text: '一年后',
+          onClick(picker) {
+            const d = new Date()
+            d.setFullYear(d.getFullYear() + 1)
+            picker.$emit('pick', d)
+          }
+        }, {
+          text: '四年后',
+          onClick(picker) {
+            const d = new Date()
+            d.setFullYear(d.getFullYear() + 4)
+            picker.$emit('pick', d)
+          }
+        }]
+      },
+      createVehicleSeriesForm: {
+        brand: '',
+        vehicleSeries: '',
+        baseDeposit: '',
+        baseMonthlyRent: '',
+        baseWeeklyRent: ''
+      },
+      vehicleSeriesOptions: [],
       statusMap: {
         0: '收车',
         1: '出车'
@@ -181,6 +489,7 @@ export default {
 
       pageSize: null,
       currentPage: null,
+      currentIndex: null,
       dialogVisible: false,
       dialog2Visible: false
     }
@@ -237,6 +546,17 @@ export default {
     },
     onSubmitCreateVehicleSeries() {
       this.dialog2Visible = false
+    },
+    onUpdate(entity) {
+      this.updateForm.id = entity.id
+      this.updateForm.licence = entity.licence
+      this.updateForm.vehicleSeries = entity.vehicleSeries
+      this.updateForm.color = entity.color
+      this.updateForm.vin = entity.vin
+      this.updateForm.registerDate = entity.registerDate
+      this.updateForm.inspectionExpired = entity.inspectionExpired
+      this.dialog3Visible = true
+      console.log(this.dialog3Visible)
     },
     handleClose(done) {
       this.$confirm('确认关闭？')
