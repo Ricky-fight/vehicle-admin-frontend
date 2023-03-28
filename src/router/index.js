@@ -81,7 +81,7 @@ export const constantRoutes = [
     path: '/hailing',
     component: Layout,
     redirect: 'noRedirect',
-    name: 'Example',
+    name: 'Hailing',
     meta: { title: '网约车管理', icon: 'el-icon-position' },
     children: [
       {

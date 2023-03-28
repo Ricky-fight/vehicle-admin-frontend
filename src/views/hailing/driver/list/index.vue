@@ -16,14 +16,24 @@
           <el-col span="6">
             <el-form-item label="颜色">
               <el-select v-model="queryForm.color" placeholder="车身颜色">
-                <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
+                <el-option
+                  v-for="(colorLabel, colorCode) in colorMap"
+                  :key="colorCode"
+                  :value="colorCode"
+                  :label="colorLabel"
+                />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col span="6">
             <el-form-item label="状态">
               <el-select v-model="queryForm.status" placeholder="车辆状态">
-                <el-option v-for="(statusCode, statusLabel) in statusMap" :key="statusCode" :label="statusCode" :value="statusLabel" />
+                <el-option
+                  v-for="(statusCode, statusLabel) in statusMap"
+                  :key="statusCode"
+                  :label="statusCode"
+                  :value="statusLabel"
+                />
               </el-select>
             </el-form-item>
           </el-col>
@@ -134,15 +144,10 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
-    <el-dialog
-      title="新建车辆"
-      :visible.sync="dialogVisible"
-      width="50%"
-      :before-close="handleClose"
-    >
+    <el-dialog title="新建车辆" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
       <el-form :model="createForm">
         <el-row>
-          <el-col span="6">
+          <el-col span="8">
             <el-form-item label="车牌号" label-width="75px">
               <el-input v-model.trim="createForm.licence" />
             </el-form-item>
@@ -157,9 +162,6 @@
               />
             </el-form-item>
           </el-col>
-          <el-col span="2">
-              <el-link type="primary" @click="onCreateVehicleSeries">新增</el-link>
-          </el-col>
           <el-col span="8">
             <el-form-item label="车架号" label-width="75px">
               <el-input v-model.trim="createForm.vin" />
@@ -170,10 +172,16 @@
           <el-col span="8">
             <el-form-item label="颜色" label-width="75px">
               <el-select v-model="queryForm.color" placeholder="选择颜色">
-                <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
+                <el-option
+                  v-for="(colorLabel, colorCode) in colorMap"
+                  :key="colorCode"
+                  :value="colorCode"
+                  :label="colorLabel"
+                />
               </el-select>
             </el-form-item>
           </el-col>
+
         </el-row>
         <el-row>
           <el-col span="12">
@@ -199,67 +207,18 @@
             </el-form-item>
           </el-col>
         </el-row>
+
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
       </span>
-        <el-dialog
-        title="新建车型"
-        :visible.sync="dialog2Visible"
-        width="50%"
-        :before-close="handle2Close"
-        append-to-body
-      >
-        <el-form :model="createVehicleSeriesForm">
-          <el-row>
-            <el-col span="12">
-              <el-form-item label="品牌" label-width="100px">
-                <el-input v-model.trim="createVehicleSeriesForm.brand" />
-              </el-form-item>
-            </el-col>
-            <el-col span="12">
-              <el-form-item label="车系" label-width="100px">
-                <el-input v-model.trim="createVehicleSeriesForm.vehicleSeries" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col span="8">
-              <el-form-item label="基础押金" label-width="100px">
-                <el-input v-model="createVehicleSeriesForm.baseDeposit" placeholder="输入金额">
-                  <template slot="append">元</template>
-                </el-input>
-              </el-form-item>
-            </el-col>
-            <el-col span="8">
-              <el-form-item label="基础月付租金" label-width="100px">
-                <el-input v-model="createVehicleSeriesForm.baseMonthlyRent" placeholder="输入金额">
-                  <template slot="append">元</template>
-                </el-input>
-              </el-form-item>
-            </el-col>
-            <el-col span="8">
-              <el-form-item label="基础周付租金" label-width="100px">
-                <el-input v-model="createVehicleSeriesForm.baseWeeklyRent" placeholder="输入金额">
-                  <template slot="append">元</template>
-                </el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-        <span slot="footer" class="dialog-footer">
-          <el-button @click="dialog2Visible = false">取 消</el-button>
-          <el-button type="primary" @click="dialog2Visible = false">确 定</el-button>
-        </span>
-      </el-dialog>
     </el-dialog>
-
   </div>
 </template>
 
 <script>
-import { getVehicleList, getVehicleSeriesOptions } from '@/api/hailing/vehicle'
+import { getVehicleList } from '@/api/hailing/vehicle'
 function min(a, b) {
   return a < b ? a : b
 }
@@ -335,13 +294,6 @@ export default {
           }
         }]
       },
-      createVehicleSeriesForm: {
-        brand: '',
-        vehicleSeries: '',
-        baseDeposit: '',
-        baseMonthlyRent: '',
-        baseWeeklyRent: ''
-      },
       statusMap: {
         0: '收车',
         1: '出车'
@@ -354,8 +306,7 @@ export default {
 
       pageSize: null,
       currentPage: null,
-      dialogVisible: false,
-      dialog2Visible: false
+      dialogVisible: false
     }
   },
   created() {
@@ -375,9 +326,7 @@ export default {
       })
     },
     fetchVehicleSeries() {
-      getVehicleSeriesOptions().then(response => {
-        this.vehicleSeriesOptions = response.data.items
-      })
+
     },
     onSubmit() {
       console.log('submit!')
@@ -405,18 +354,8 @@ export default {
     onCreate() {
       this.dialogVisible = true
     },
-    onCreateVehicleSeries() {
-      this.dialog2Visible = true
-    },
     handleClose(done) {
       this.$confirm('确认关闭？')
-        .then(_ => {
-          done()
-        })
-        .catch(_ => { })
-    },
-    handle2Close(done) {
-      this.$confirm('确认2关闭？')
         .then(_ => {
           done()
         })
@@ -430,14 +369,15 @@ export default {
 </script>
 <style>
 .box-card {
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
-.form-btns {
-  margin-left: 10px;
-}
-.el-form--inline .el-form-item{
-  margin-right: 0;
+    border-radius: 10px;
+    margin-bottom: 10px;
 }
 
+.form-btns {
+    margin-left: 10px;
+}
+
+.el-form--inline .el-form-item {
+    margin-right: 0;
+}
 </style>
