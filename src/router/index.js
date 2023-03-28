@@ -93,7 +93,7 @@ export const constantRoutes = [
       {
         path: 'driver',
         name: 'Driver',
-        component: () => import('@/views/404'),
+        component: () => import('@/views/hailing/driver/list/index'),
         meta: { title: '司机管理', icon: 'el-icon-s-custom' }
       },
       {

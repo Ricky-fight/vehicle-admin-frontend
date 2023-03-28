@@ -2,56 +2,38 @@
   <div class="app-container">
     <el-card class="box-card">
       <!--      <el-row type="flex" justify="end">-->
-      <el-form :model="queryForm" class="" label-width="75px">
+      <el-form :model="queryForm" class="" label-width="100px">
         <el-row justify="end">
           <el-col span="6">
-            <el-form-item label="车型">
-              <el-cascader
-                v-model="queryForm.vehicleSeries"
-                :options="vehicleSeriesOptions"
-                @change="handleVehicleSeriesChange"
-              />
+            <el-form-item label="姓名">
+              <el-input v-model="queryForm.name" placeholder="司机姓名" />
             </el-form-item>
           </el-col>
           <el-col span="6">
-            <el-form-item label="颜色">
-              <el-select v-model="queryForm.color" placeholder="车身颜色">
-                <el-option
-                  v-for="(colorLabel, colorCode) in colorMap"
-                  :key="colorCode"
-                  :value="colorCode"
-                  :label="colorLabel"
-                />
-              </el-select>
+            <el-form-item label="做单手机号">
+              <el-input v-model="queryForm.phone1" placeholder="输入手机号" />
             </el-form-item>
           </el-col>
-          <el-col span="6">
-            <el-form-item label="状态">
-              <el-select v-model="queryForm.status" placeholder="车辆状态">
-                <el-option
-                  v-for="(statusCode, statusLabel) in statusMap"
-                  :key="statusCode"
-                  :label="statusCode"
-                  :value="statusLabel"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col span="6">
-            <el-form-item label="司机">
-              <el-input v-model="queryForm.driverName" placeholder="司机姓名" />
+          <el-col span="12">
+            <el-form-item label="地址">
+              <el-input v-model="queryForm.address" placeholder="输入地址" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="12">
-            <el-form-item label="车架号">
-              <el-input v-model="queryForm.vin" placeholder="车架号" />
+          <el-col span="6">
+            <el-form-item label="车牌号">
+              <el-input v-model="queryForm.driverName" placeholder="输入车牌号" />
             </el-form-item>
           </el-col>
-          <el-col span="12">
-            <el-form-item label="车牌号">
-              <el-input v-model="queryForm.licence" placeholder="车牌号" />
+          <el-col span="6">
+            <el-form-item label="车型">
+              <el-cascader
+                v-model="queryForm.vehicleSeries"
+                placeholder="选择车型"
+                :options="vehicleSeriesOptions"
+                @change="handleVehicleSeriesChange"
+              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -79,44 +61,49 @@
         stripe
         highlight-current-row
       >
-        <el-table-column label="车牌号" align="center" width="150">
+        <el-table-column label="司机姓名" align="center" width="100">
           <template slot-scope="scope">
-            {{ scope.row.licence }}
+            {{ scope.row.name }}
           </template>
         </el-table-column>
-        <el-table-column label="颜色" align="center" width="50">
+        <el-table-column label="做单手机号" align="center" width="150">
           <template slot-scope="scope">
-            {{ colorMap[scope.row.color] }}
+            {{ scope.row.phone1 }}
           </template>
         </el-table-column>
-        <el-table-column label="车架号" width="200" align="center">
+        <el-table-column label="联系手机号" width="150" align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.vin }}</span>
+            {{ scope.row.phone2 }}
           </template>
         </el-table-column>
-        <el-table-column label="司机" width="110" align="center">
+        <el-table-column label="紧急联系人手机号" align="center" width="150">
           <template slot-scope="scope">
-            {{ scope.row.driverName }}
+            {{ scope.row.emergencyPhone }}
           </template>
         </el-table-column>
-        <el-table-column label="品牌型号" align="center">
+        <el-table-column label="联系地址" align="center">
           <template slot-scope="scope">
-            {{ scope.row.vehicleSeries }}
+            {{ scope.row.address }}
           </template>
         </el-table-column>
-        <el-table-column label="行驶证注册日期" width="150" align="center">
+        <el-table-column label="驾驶证注册日期" width="150" align="center">
           <template slot-scope="scope">
             {{ scope.row.registerDate }}
           </template>
         </el-table-column>
-        <el-table-column label="检检有效期" width="150" align="center">
+        <el-table-column label="车牌号" width="150" align="center">
           <template slot-scope="scope">
-            {{ scope.row.inspectionExpired }}
+            {{ scope.row.vehicle.licence }}
+          </template>
+        </el-table-column>
+        <el-table-column label="车型" width="200" align="center">
+          <template slot-scope="scope">
+            {{ scope.row.vehicle.vehicleSeries }}
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="状态" width="110" align="center">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.status | statusFilter">{{ statusMap[scope.row.status] }}</el-tag>
+            <el-tag :type="scope.row.status | statusFilter">{{ status(scope.row.vehicle) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="110" align="center">
@@ -144,70 +131,51 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
-    <el-dialog title="新建车辆" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
-      <el-form :model="createForm">
+    <el-dialog title="新建司机" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+      <el-form :model="createForm" label-width="125px">
         <el-row>
-          <el-col span="8">
-            <el-form-item label="车牌号" label-width="75px">
-              <el-input v-model.trim="createForm.licence" />
+          <el-col span="12">
+            <el-form-item label="姓名">
+              <el-input v-model.trim="createForm.name" placeholder="输入姓名" clearable />
             </el-form-item>
           </el-col>
-          <el-col span="8">
-            <el-form-item label="车型" label-width="75px">
-              <el-cascader
-                v-model="createForm.vehicleSeries"
-                placeholder="选择车型"
-                :options="vehicleSeriesOptions"
-                @change="handleVehicleSeriesChange"
-              />
+          <el-col span="12">
+            <el-form-item label="做单手机号">
+              <el-input v-model.trim="createForm.phone1" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
-          <el-col span="8">
-            <el-form-item label="车架号" label-width="75px">
-              <el-input v-model.trim="createForm.vin" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col span="8">
-            <el-form-item label="颜色" label-width="75px">
-              <el-select v-model="queryForm.color" placeholder="选择颜色">
-                <el-option
-                  v-for="(colorLabel, colorCode) in colorMap"
-                  :key="colorCode"
-                  :value="colorCode"
-                  :label="colorLabel"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-
         </el-row>
         <el-row>
           <el-col span="12">
+            <el-form-item label="联系手机号">
+              <el-input v-model.trim="createForm.phone2" placeholder="输入手机号" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col span="12">
+            <el-form-item label="紧急联系人">
+              <el-input v-model.trim="createForm.emergencyPhone" placeholder="输入手机号" clearable />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col span="24">
+            <el-form-item label="联系地址" clearable>
+              <el-input v-model="createForm.address" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col span="24">
             <el-form-item label="行驶证注册日期">
               <el-date-picker
                 v-model="createForm.registerDate"
                 align="right"
                 type="date"
                 placeholder="选择日期"
-                :picker-options="pickerOptions1"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col span="12">
-            <el-form-item label="检验有效期">
-              <el-date-picker
-                v-model="queryForm.inspectionExpired"
-                align="right"
-                type="date"
-                placeholder="选择日期"
-                :picker-options="pickerOptions2"
               />
             </el-form-item>
           </el-col>
         </el-row>
-
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -218,7 +186,8 @@
 </template>
 
 <script>
-import { getVehicleList } from '@/api/hailing/vehicle'
+import { getVehicleList, getVehicleSeriesOptions } from '@/api/hailing/vehicle'
+import { getDriverList } from '@/api/hailing/driver'
 function min(a, b) {
   return a < b ? a : b
 }
@@ -239,11 +208,11 @@ export default {
       list: null,
       listLoading: true,
       queryForm: {
-        vehicleSeries: [],
-        color: '',
-        vin: '',
-        licence: '',
-        driverName: ''
+        name: '',
+        phone1: '',
+        phone2: '',
+        emergencyPhone: '',
+        address: ''
       },
       createForm: {
         vehicleSeries: [],
@@ -295,15 +264,9 @@ export default {
         }]
       },
       statusMap: {
-        0: '收车',
-        1: '出车'
+        0: '已解约',
+        1: '已签约'
       },
-      colorMap: {
-        black: '黑',
-        white: '白',
-        gray: '灰'
-      },
-
       pageSize: null,
       currentPage: null,
       dialogVisible: false
@@ -316,17 +279,18 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      getVehicleList().then(response => {
+      getDriverList().then(response => {
         this.list = response.data.items
         this.pageSize = 10 // TODO:可选择的分页条数
-
         this.renderList = this.list.slice(0, min(this.pageSize, this.list.length))
         this.listLoading = false
-        console.log(this.renderList)
+        // console.log(this.renderList)
       })
     },
     fetchVehicleSeries() {
-
+      getVehicleSeriesOptions().then(response => {
+        this.vehicleSeriesOptions = response.data.items
+      })
     },
     onSubmit() {
       console.log('submit!')
@@ -363,6 +327,12 @@ export default {
     },
     handleVehicleSeriesChange(value) {
       console.log(value)
+    },
+    status(vehicle) {
+      if (vehicle && vehicle.licence) {
+        return this.statusMap[1]
+      }
+      return this.statusMap[0]
     }
   }
 }
