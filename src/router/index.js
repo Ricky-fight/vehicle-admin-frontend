@@ -99,7 +99,16 @@ export const constantRoutes = [
       {
         path: 'contrast',
         name: 'Contrast',
-        component: () => import('@/views/404'),
+        alwaysShow: true,
+        component: () => import('@/views/hailing/contrast/index'),
+        children: [
+          {
+            path: 'new',
+            name: 'New',
+            component: () => import('@/views/hailing/contrast/create/index'),
+            meta: { title: '录入合同', icon: 'el-icon-document-add' }
+          }
+        ],
         meta: { title: '租赁合同管理', icon: 'el-icon-document' }
       }
     ]

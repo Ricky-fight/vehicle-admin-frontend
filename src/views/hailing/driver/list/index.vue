@@ -36,6 +36,21 @@
               />
             </el-form-item>
           </el-col>
+          <el-col span="12">
+            <el-form-item label="驾驶证日期">
+              <el-date-picker
+                v-model="queryForm.registerDate"
+                type="daterange"
+                format="M 月 dd 日"
+                align="right"
+                unlink-panels
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                :picker-options="pickerOptions"
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
       <el-form label-width="75px" inline align="right">
@@ -107,17 +122,11 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="110" align="center">
-          <template>
-            <el-link type="primary" style="margin-right: 5px">更新</el-link>
-            <el-link type="danger">删除</el-link>
+          <template slot-scope="scope">
+            <el-link type="primary" style="margin-right: 5px" @click="(event) => onUpdate(scope.row, event)">更新</el-link>
+            <el-link type="danger" @click="(event) => onDelete(scope.row.id, event)">删除</el-link>
           </template>
         </el-table-column>
-        <!--        <el-table-column align="center" prop="created_at" label="Display_time" width="200">-->
-        <!--          <template slot-scope="scope">-->
-        <!--            <i class="el-icon-time" />-->
-        <!--            <span>{{ scope.row.display_time }}</span>-->
-        <!--          </template>-->
-        <!--        </el-table-column>-->
       </el-table>
       <div style="margin-bottom: 8px" />
       <el-pagination
@@ -131,7 +140,7 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
-    <el-dialog title="新建司机" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+    <el-dialog title="新建司机" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
       <el-form :model="createForm" label-width="125px">
         <el-row>
           <el-col span="12">
@@ -182,11 +191,62 @@
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="更新司机" :visible.sync="dialog2Visible" width="40%" :before-close="handleClose">
+      <el-form :model="updateForm" label-width="125px">
+        <el-row>
+          <el-col span="12">
+            <el-form-item label="姓名">
+              <el-input v-model.trim="updateForm.name" placeholder="输入姓名" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col span="12">
+            <el-form-item label="做单手机号">
+              <el-input v-model.trim="updateForm.phone1" placeholder="输入手机号" clearable />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col span="12">
+            <el-form-item label="联系手机号">
+              <el-input v-model.trim="updateForm.phone2" placeholder="输入手机号" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col span="12">
+            <el-form-item label="紧急联系人">
+              <el-input v-model.trim="updateForm.emergencyPhone" placeholder="输入手机号" clearable />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col span="24">
+            <el-form-item label="联系地址" clearable>
+              <el-input v-model="updateForm.address" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col span="24">
+            <el-form-item label="行驶证注册日期">
+              <el-date-picker
+                v-model="updateForm.registerDate"
+                align="right"
+                type="date"
+                placeholder="选择日期"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialog2Visible = false">取 消</el-button>
+        <el-button type="primary" @click="dialog2Visible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getVehicleList, getVehicleSeriesOptions } from '@/api/hailing/vehicle'
+import { getVehicleSeriesOptions } from '@/api/hailing/vehicle'
 import { getDriverList } from '@/api/hailing/driver'
 function min(a, b) {
   return a < b ? a : b
@@ -212,9 +272,45 @@ export default {
         phone1: '',
         phone2: '',
         emergencyPhone: '',
-        address: ''
+        address: '',
+        registerDate: ''
+      },
+      pickerOptions: {
+        shortcuts: [{
+          text: '未来一个月',
+          onClick(picker) {
+            const start = new Date()
+            const end = new Date()
+            end.setMonth(end.getMonth() + 1)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '未来两个月',
+          onClick(picker) {
+            const start = new Date()
+            const end = new Date()
+            end.setMonth(end.getMonth() + 2)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '未来三个月',
+          onClick(picker) {
+            const start = new Date()
+            const end = new Date()
+            end.setMonth(end.getMonth() + 3)
+            picker.$emit('pick', [start, end])
+          }
+        }]
       },
       createForm: {
+        name: '',
+        phone1: '',
+        phone2: '',
+        emergencyPhone: '',
+        address: '',
+        registerDate: ''
+      },
+      updateForm: {
         vehicleSeries: [],
         color: '',
         vin: '',
@@ -269,7 +365,8 @@ export default {
       },
       pageSize: null,
       currentPage: null,
-      dialogVisible: false
+      dialogVisible: false,
+      dialog2Visible: false
     }
   },
   created() {
@@ -333,6 +430,27 @@ export default {
         return this.statusMap[1]
       }
       return this.statusMap[0]
+    },
+    onUpdate(entity, event) {
+      this.updateForm.driverName =
+      this.dialog2Visible = true
+    },
+    onDelete(id, event) {
+      this.$confirm('此操作将永久删除该司机, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
   }
 }

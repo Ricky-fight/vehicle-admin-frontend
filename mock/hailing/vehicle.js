@@ -9,7 +9,8 @@ const data = Mock.mock({
     vin: 'LSJW' + Random.string('number', 5) + 'PG' + Random.string('number', 6),
     'status|1': ['0', '1'],
     driverName: '@cname',
-    'vehicleSeries|1': ['荣威-荣威I6', '荣威-荣威I6 MAX', '荣威-荣威I6 MAX EV', '大众-朗逸'],
+    'brand|1': ['荣威', '大众', '丰田'],
+    'vehicleSeries|1': ['荣威I6', '荣威I6 MAX', '荣威I6 MAX EV', '朗逸'],
     registerDate: '@date',
     inspectionExpired: '@date(yyyy-MM)'
   }]

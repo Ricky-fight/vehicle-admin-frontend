@@ -19,6 +19,8 @@ Mock.Random.extend({
 })
 const data = Mock.mock({
   'items|360': [{
+    id: Random.increment(),
+    identificationNo: '@id',
     name: '@cname',
     phone1: '@phone',
     phone2: '@phone',
