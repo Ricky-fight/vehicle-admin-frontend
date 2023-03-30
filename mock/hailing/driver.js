@@ -1,26 +1,9 @@
 const Mock = require('mockjs')
-const Random = Mock.Random
 
-Mock.Random.extend({
-  phone: function() {
-    const phonePrefixs = ['132', '135', '189'] // 自己写前缀哈
-    return this.pick(phonePrefixs) + Mock.mock(/\d{8}/)
-  }
-})
-Mock.Random.extend({
-  address: function() {
-    return Random.county(true) + 'xxxx号xx楼xx室'
-  }
-})
-Mock.Random.extend({
-  vehicleLicence: function() {
-    return '沪' + Random.string('upper', 3) + Random.string('number', 4)
-  }
-})
 const data = Mock.mock({
   'items|360': [{
-    id: Random.increment(),
-    identificationNo: '@id',
+    id: '@increment',
+    identificationNo: '@idNo',
     name: '@cname',
     phone1: '@phone',
     phone2: '@phone',

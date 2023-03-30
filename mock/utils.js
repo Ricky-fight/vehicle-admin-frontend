@@ -1,3 +1,5 @@
+const Mock = require('mockjs')
+const Random = Mock.Random
 /**
  * @param {string} url
  * @returns {Object}

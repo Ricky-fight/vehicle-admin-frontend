@@ -1,12 +1,11 @@
 const Mock = require('mockjs')
-const Random = Mock.Random
 
 const data = Mock.mock({
   'items|205': [{
-    id: '@id',
-    licence: '沪' + Random.string('upper', 3) + Random.string('number', 4),
+    id: '@increment',
+    licence: '@carPlate',
     'color|1': ['black', 'white', 'gray'],
-    vin: 'LSJW' + Random.string('number', 5) + 'PG' + Random.string('number', 6),
+    vin: '@vin',
     'status|1': ['0', '1'],
     driverName: '@cname',
     'brand|1': ['荣威', '大众', '丰田'],
