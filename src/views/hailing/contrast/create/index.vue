@@ -32,7 +32,7 @@
             <el-link type="primary" style="margin-left: 5px" href="#/hailing/driver" target="_blank" :underline="false">去新增/编辑司机信息</el-link>
           </div>
           <div class="driver-warn">
-            <span v-show="form.driver.id">{{  'WIP: 提示信息(如：该司机已有生效合同)'  }}</span>
+            <span v-show="form.driver.id">{{ 'WIP: 提示信息(如：该司机已有生效合同)' }}</span>
           </div>
         </el-form-item>
         <el-descriptions>
@@ -84,13 +84,33 @@
           <el-descriptions-item label="检验有效期">{{ form.vehicle.inspectionExpired }}</el-descriptions-item>
         </el-descriptions>
         <el-divider content-position="center">合同内容</el-divider>
-        <el-form-item>
-          <el-radio-group v-model="radio3" size="small">
-            <el-radio-button label="上海"></el-radio-button>
-            <el-radio-button label="北京" disabled ></el-radio-button>
-            <el-radio-button label="广州"></el-radio-button>
-            <el-radio-button label="深圳"></el-radio-button>
+        <el-form-item label="平台">
+          <el-radio-group v-model="form.platform" size="small">
+            <el-radio-button label="滴滴" value="0" />
+            <el-radio-button label="美团" value="1" />
+            <el-radio-button label="享道" value="2" disabled />
+            <el-radio-button label="T3" value="3" disabled />
           </el-radio-group>
+        </el-form-item>
+        <el-form-item label="签订日期">
+          <el-date-picker
+            v-model="form.signingDate"
+            placeholder="选择日期"
+            align="right"
+            :picker-options="pickerOptions"
+          />
+        </el-form-item>
+        <el-form-item label="合同期限">
+          <el-date-picker
+            v-model="form.contrastDate"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :picker-options="pickerOptions2"
+          />
         </el-form-item>
       </el-form>
     </el-card>
@@ -114,14 +134,75 @@ export default {
         vehicle: {
           id: ''
         },
-        paymentPlan: []
+        paymentPlan: [],
+        platform: 0,
+        signingDate: ''
       },
       driverList: [],
       options: [],
       driverLoading: false,
       vehicleList: [],
       options2: [],
-      vehicleLoading: false
+      vehicleLoading: false,
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        },
+        shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            picker.$emit('pick', new Date())
+          }
+        }, {
+          text: '昨天',
+          onClick(picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24)
+            picker.$emit('pick', date)
+          }
+        }, {
+          text: '一周前',
+          onClick(picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', date)
+          }
+        }]
+      },
+      contrastDate: [],
+      pickerOptions2: {
+        shortcuts: [{
+          text: '三个月',
+          onClick(picker) {
+            const months = 3
+            const end = new Date()
+            const start = new Date()
+            end.setFullYear(end.getFullYear(), end.getMonth() + months + 1, 1)
+            end.setTime(end.getTime() - 3600 * 1000 * 24)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '六个月',
+          onClick(picker) {
+            const months = 6
+            const end = new Date()
+            const start = new Date()
+            end.setFullYear(end.getFullYear(), end.getMonth() + months + 1, 1)
+            end.setTime(end.getTime() - 3600 * 1000 * 24)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '一年',
+          onClick(picker) {
+            const months = 12
+            const end = new Date()
+            const start = new Date()
+            end.setFullYear(end.getFullYear(), end.getMonth() + months + 1, 1)
+            end.setTime(end.getTime() - 3600 * 1000 * 24)
+            picker.$emit('pick', [start, end])
+          }
+        }]
+      }
     }
   },
   mounted() {
@@ -220,7 +301,7 @@ export default {
   }
 }
 </script>
-<style scoped lang="scss">
+<style lang="scss">
 .el-card {
   border-radius: 10px;
   margin-bottom: 10px;
