@@ -19,7 +19,6 @@ export const colorMap = {
   gray: '灰'
 }
 export function colorFilter(color) {
-
   return colorMap[color]
 }
 
@@ -29,4 +28,12 @@ export const statusMap = {
 }
 export function vehicleStatusFilter(status) {
   return statusMap[status]
+}
+export const paymentMap = {
+  null: '元',
+  '0': '元/月',
+  '1': '元/周'
+}
+export function paymentFilter(payment) {
+  return paymentMap[payment]
 }

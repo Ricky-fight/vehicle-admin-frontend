@@ -86,10 +86,10 @@
         <el-divider content-position="center">合同内容</el-divider>
         <el-form-item label="平台">
           <el-radio-group v-model="form.platform" size="small">
-            <el-radio-button label="滴滴" value="0" />
-            <el-radio-button label="美团" value="1" />
-            <el-radio-button label="享道" value="2" disabled />
-            <el-radio-button label="T3" value="3" disabled />
+            <el-radio-button :label="0" :value="0">滴滴</el-radio-button> />
+            <el-radio-button :label="1" :value="1">美团</el-radio-button> />
+            <el-radio-button :label="2" :value="2" disabled>享道</el-radio-button> />
+            <el-radio-button :label="3" :value="3" disabled>T3</el-radio-button> />
           </el-radio-group>
         </el-form-item>
         <el-form-item label="签订日期">
@@ -112,6 +112,27 @@
             :picker-options="pickerOptions2"
           />
         </el-form-item>
+        <el-form-item label="支付周期">
+          <el-radio-group v-model="form.paymentPeriod" size="small">
+            <el-radio-button :value="0" :label="0">月付</el-radio-button>/>
+            <el-radio-button :value="1" :label="1">周付</el-radio-button>/>
+            <el-radio-button :value="2" :label="2" disabled>月付（首月周付）</el-radio-button>/>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="押金">
+          <el-input v-model="form.deposit" style="width:200px">
+            <template #append>
+              元
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="租金">
+          <el-input v-model="form.rent" style="width:200px">
+            <template #append>
+              {{ form.paymentPeriod | paymentFilter }}
+            </template>
+          </el-input>
+        </el-form-item>
       </el-form>
     </el-card>
   </div>
@@ -119,11 +140,22 @@
 <script>
 import { getDriverList } from '@/api/hailing/driver'
 import { getVehicleList } from '@/api/hailing/vehicle'
-import { colorFilter } from '@/filters'
-
+import { colorFilter, paymentFilter } from '@/filters'
+// 计算合同终止日，若过了每月月中则拉到月底，否则终止日为输入的相应月数再减1天
+function computeEndDate(start, months) {
+  let end = new Date(start)
+  if (end.getDate() >= 15) {
+    end.setFullYear(end.getFullYear(), end.getMonth() + months + 1, 0)
+  } else {
+    end.setMonth(end.getMonth() + months)
+    end.setDate(end.getDate() - 1)
+  }
+  return end
+}
 export default {
   filters: {
-    colorFilter
+    colorFilter,
+    paymentFilter
   },
   data() {
     return {
@@ -136,7 +168,10 @@ export default {
         },
         paymentPlan: [],
         platform: 0,
-        signingDate: ''
+        signingDate: '',
+        paymentPeriod: 0,
+        deposit: null,
+        rent: null,
       },
       driverList: [],
       options: [],
@@ -175,30 +210,24 @@ export default {
           text: '三个月',
           onClick(picker) {
             const months = 3
-            const end = new Date()
             const start = new Date()
-            end.setFullYear(end.getFullYear(), end.getMonth() + months + 1, 1)
-            end.setTime(end.getTime() - 3600 * 1000 * 24)
+            const end = computeEndDate(start, months)
             picker.$emit('pick', [start, end])
           }
         }, {
           text: '六个月',
           onClick(picker) {
             const months = 6
-            const end = new Date()
             const start = new Date()
-            end.setFullYear(end.getFullYear(), end.getMonth() + months + 1, 1)
-            end.setTime(end.getTime() - 3600 * 1000 * 24)
+            const end = computeEndDate(start, months)
             picker.$emit('pick', [start, end])
           }
         }, {
           text: '一年',
           onClick(picker) {
             const months = 12
-            const end = new Date()
             const start = new Date()
-            end.setFullYear(end.getFullYear(), end.getMonth() + months + 1, 1)
-            end.setTime(end.getTime() - 3600 * 1000 * 24)
+            const end = computeEndDate(start, months)
             picker.$emit('pick', [start, end])
           }
         }]

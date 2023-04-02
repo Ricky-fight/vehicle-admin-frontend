@@ -149,7 +149,7 @@
       :before-close="handleClose"
     >
       <div class="drawer-container">
-        <span>{{ this.temp }}</span>
+        <span>{{ temp }}</span>
         <el-form :model="temp" label-width="100px" label-position="left">
           <el-form-item label="序号">
             <el-input v-model="temp.id" placeholder="系统内部序号" disabled />
@@ -248,14 +248,6 @@ function min(a, b) {
   return a < b ? a : b
 }
 export default {
-  computed: {
-    colorMap() {
-      return colorMap
-    },
-    statusMap() {
-      return statusMap
-    }
-  },
   filters: {
     statusFilter: statusTagFilter,
     titleFilter,
@@ -361,6 +353,14 @@ export default {
       innerDrawerVisible: false
     }
   },
+  computed: {
+    colorMap() {
+      return colorMap
+    },
+    statusMap() {
+      return statusMap
+    }
+  },
   created() {
     this.fetchData()
     this.fetchVehicleSeries()
@@ -438,10 +438,10 @@ export default {
       // TODO: 提交
       switch (this.formType) {
         // eslint-disable-next-line no-empty
-        case 'create': {
-
-        }
-        case 'update': {
+        // case 'create': {
+        // }
+        //   break
+        case 'update':
           updateVehicle(this.temp.id, this.temp).then(() => {
             this.$message({
               message: '更新车辆成功',
@@ -449,7 +449,6 @@ export default {
             })
             this.$message.success('更新车辆成功')
           })
-        }
           break
         default:
           break

@@ -8,8 +8,8 @@
         v-for="item in options"
         :key="item.value"
         :label="item.label"
-        :value="item.value">
-      </el-option>
+        :value="item.value"
+      />
     </el-select>
   </div>
 </template>
@@ -21,12 +21,6 @@ import Test from '@/views/hailing/components/Test.vue'
 export default {
   name: 'Dashboard',
   components: { Test },
-  computed: {
-    ...mapGetters([
-      'name',
-      'roles'
-    ])
-  },
   data() {
     return {
       options: [{
@@ -47,6 +41,12 @@ export default {
       }],
       value: ''
     }
+  },
+  computed: {
+    ...mapGetters([
+      'name',
+      'roles'
+    ])
   }
 }
 </script>

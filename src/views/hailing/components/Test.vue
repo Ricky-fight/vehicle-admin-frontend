@@ -6,7 +6,10 @@
 export default {
   name: 'Test',
   props: {
-    testProp: String
+    testProp: {
+      type: String,
+      default: ''
+    }
   }
 }
 </script>

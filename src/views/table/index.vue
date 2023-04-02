@@ -77,7 +77,6 @@
 
 <script>
 import { getList } from '@/api/table'
-import col from 'element-ui/packages/col'
 function min(a, b) {
   return a < b ? a : b
 }
@@ -143,7 +142,6 @@ export default {
       this.renderList = this.list.slice(index * this.pageSize, min((index + 1) * this.pageSize, this.list.length))
       console.log(`当前页: ${val}`)
     }
-
   }
 }
 </script>
