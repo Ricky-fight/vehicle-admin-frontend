@@ -1,6 +1,13 @@
 <template>
   <div>
-    <el-card>
+    <el-card class="box-card">
+      <el-steps :active="step" class="step" align-center>
+        <el-step title="录入" icon="el-icon-edit"></el-step>
+        <el-step title="提交" icon="el-icon-upload"></el-step>
+        <el-step title="打印" icon="el-icon-picture"></el-step>
+      </el-steps>
+    </el-card>
+    <el-card v-if="step === 1">
       <h2>录入合同</h2>
       <el-form ref="form" :model="form" label-width="90px" label-position="left">
         <el-divider content-position="center">司机信息</el-divider>
@@ -133,17 +140,28 @@
             </template>
           </el-input>
         </el-form-item>
+        <el-form-item style="float: right">
+          <el-button @click="handleSubmit" type="primary">提交</el-button>
+        </el-form-item>
       </el-form>
+    </el-card>
+    <el-card v-if="step === 2">
+      <el-result v-bind="result['success']">
+        <template #extra>
+          <el-button size="medium" @click="step--">返回</el-button>
+          <el-button type="primary" size="medium" @click="step--">下载合同</el-button>
+        </template>
+      </el-result>
     </el-card>
   </div>
 </template>
 <script>
 import { getDriverList } from '@/api/hailing/driver'
 import { getVehicleList } from '@/api/hailing/vehicle'
-import { colorFilter, paymentFilter } from '@/filters'
+import { colorFilter, paymentFilter, resultMap } from '@/filters'
 // 计算合同终止日，若过了每月月中则拉到月底，否则终止日为输入的相应月数再减1天
 function computeEndDate(start, months) {
-  let end = new Date(start)
+  const end = new Date(start)
   if (end.getDate() >= 15) {
     end.setFullYear(end.getFullYear(), end.getMonth() + months + 1, 0)
   } else {
@@ -153,12 +171,18 @@ function computeEndDate(start, months) {
   return end
 }
 export default {
+  computed: {
+    resultMap() {
+      return resultMap
+    }
+  },
   filters: {
     colorFilter,
     paymentFilter
   },
   data() {
     return {
+      step: 1,
       form: {
         driver: {
           id: ''
@@ -171,7 +195,7 @@ export default {
         signingDate: '',
         paymentPeriod: 0,
         deposit: null,
-        rent: null,
+        rent: null
       },
       driverList: [],
       options: [],
@@ -231,7 +255,8 @@ export default {
             picker.$emit('pick', [start, end])
           }
         }]
-      }
+      },
+      result: resultMap
     }
   },
   mounted() {
@@ -325,6 +350,9 @@ export default {
     },
     handleClear2() {
       this.form.vehicle = {}
+    },
+    handleSubmit() {
+      this.step += 1
     }
 
   }
@@ -381,5 +409,9 @@ export default {
       color: #ddd;
     }
   }
+}
+.step {
+  margin: auto;
+  padding: 10px;
 }
 </style>

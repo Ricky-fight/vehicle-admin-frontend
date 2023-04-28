@@ -3,7 +3,7 @@
     <el-card class="box-card">
       <el-form :model="queryForm" class="" label-width="75px">
         <el-row justify="end">
-          <el-col span="6">
+          <el-col :span="6">
             <el-form-item label="车型">
               <el-cascader
                 v-model="queryForm.vehicleSeries"
@@ -12,33 +12,33 @@
               />
             </el-form-item>
           </el-col>
-          <el-col span="6">
+          <el-col :span="6">
             <el-form-item label="颜色">
               <el-select v-model="queryForm.color" placeholder="车身颜色">
                 <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col span="6">
+          <el-col :span="6">
             <el-form-item label="状态">
               <el-select v-model="queryForm.status" placeholder="车辆状态">
                 <el-option v-for="(statusCode, statusLabel) in statusMap" :key="statusCode" :label="statusCode" :value="statusLabel" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col span="6">
+          <el-col :span="6">
             <el-form-item label="司机">
               <el-input v-model="queryForm.driverName" placeholder="司机姓名" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="车架号">
               <el-input v-model="queryForm.vin" placeholder="车架号" />
             </el-form-item>
           </el-col>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="车牌号">
               <el-input v-model="queryForm.licence" placeholder="车牌号" />
             </el-form-item>
@@ -74,7 +74,7 @@
         </el-table-column>
         <el-table-column label="车牌号" align="center" width="150">
           <template slot-scope="scope">
-            {{ scope.row.licence }}
+            {{ scope.row.licenceNo }}
           </template>
         </el-table-column>
         <el-table-column label="颜色" align="center" width="50">
@@ -89,12 +89,12 @@
         </el-table-column>
         <el-table-column label="品牌" width="110" align="center">
           <template slot-scope="scope">
-            {{ scope.row.brand }}
+            {{ scope.row.type.brand }}
           </template>
         </el-table-column>
         <el-table-column label="车系" align="center">
           <template slot-scope="scope">
-            {{ scope.row.vehicleSeries }}
+            {{ scope.row.type.series }}
           </template>
         </el-table-column>
         <el-table-column label="行驶证注册日期" width="150" align="center">
@@ -136,7 +136,7 @@
         :page-sizes="[10, 20, 50, 100]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="list.length"
+        :total="total"
         align="right"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -256,6 +256,7 @@ export default {
   },
   data() {
     return {
+      total: 0,
       renderList: null,
       list: null,
       listLoading: true,
@@ -370,10 +371,14 @@ export default {
     fetchData() {
       this.listLoading = true
       getVehicleList().then(response => {
-        this.list = response.data.items
+        this.total = response.data.count
+        this.list = response.data.results
         this.pageSize = 10 // TODO:可选择的分页条数
-
-        this.renderList = this.list.slice(0, min(this.pageSize, this.list.length))
+        let length = 0
+        if (this.list) {
+          length = this.list.length
+        }
+        this.renderList = this.list.slice(0, min(this.pageSize, length))
         this.listLoading = false
         console.log(this.renderList)
       })

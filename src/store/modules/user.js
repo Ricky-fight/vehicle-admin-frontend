@@ -1,5 +1,5 @@
 import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken, setRefresh } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
@@ -7,7 +7,7 @@ const getDefaultState = () => {
     token: getToken(),
     name: '',
     avatar: '',
-    roles: []
+    groups: []
   }
 }
 
@@ -26,8 +26,8 @@ const mutations = {
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   },
-  SET_ROLES: (state, roles) => {
-    state.roles = roles
+  SET_GROUPS: (state, groups) => {
+    state.groups = groups
   }
 }
 
@@ -37,12 +37,16 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
+        console.log('begin')
         const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
+        commit('SET_TOKEN', data.access)
+        setToken(data.access)
+        setRefresh(data.refresh)
         resolve()
+        console.log('end')
       }).catch(error => {
         reject(error)
+        console.log('aaaaa')
       })
     })
   },
@@ -57,18 +61,19 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, name, avatar } = data
+        const { groups, username, avatar } = data
 
         // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
+        if (!groups || groups.length <= 0) {
+          reject('getInfo: groups must be a non-null array!')
         }
 
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
+        commit('SET_GROUPS', groups)
+        commit('SET_NAME', username)
         commit('SET_AVATAR', avatar)
         resolve(data)
       }).catch(error => {
+        console.log('111')
         reject(error)
       })
     })

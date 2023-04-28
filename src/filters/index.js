@@ -14,9 +14,9 @@ export function titleFilter(title) {
   return titleMap[title]
 }
 export const colorMap = {
-  black: '黑',
-  white: '白',
-  gray: '灰'
+  1: '黑',
+  2: '白',
+  3: '灰'
 }
 export function colorFilter(color) {
   return colorMap[color]
@@ -31,9 +31,26 @@ export function vehicleStatusFilter(status) {
 }
 export const paymentMap = {
   null: '元',
-  '0': '元/月',
-  '1': '元/周'
+  '0': '元 / 月',
+  '1': '元 / 周'
 }
 export function paymentFilter(payment) {
   return paymentMap[payment]
 }
+
+export const resultMap = {
+  success: {
+    icon: 'success',
+    title: '提交成功',
+    subTitle: '您可返回合同列表或下载合同'
+  },
+  error: {
+    icon: 'error',
+    title: '提交失败',
+    subTitle: '请尝试重新提交'
+  }
+}
+export function resultFilter(result) {
+  return resultMap[result]
+}
+

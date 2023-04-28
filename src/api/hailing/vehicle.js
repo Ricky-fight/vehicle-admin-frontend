@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getVehicleList(params) {
   return request({
-    url: '/api/hailing/vehicles',
+    url: '/hailing/vehicles/',
     method: 'get',
     params
   })
@@ -10,13 +10,13 @@ export function getVehicleList(params) {
 
 export function getVehicleSeriesOptions() {
   return request({
-    url: '/api/hailing/vehicle-series',
+    url: '/hailing/vehicle/types/',
     method: 'get'
   })
 }
 export function updateVehicle(id, data) {
   return request({
-    url: `/api/hailing/vehicles/${id}`,
+    url: `/hailing/vehicles/${id}`,
     method: 'post',
     data: data
   })

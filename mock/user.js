@@ -1,22 +1,24 @@
 
 const tokens = {
   admin: {
-    token: 'admin-token'
+    access: 'admin-token',
+    refresh: 'refresh-token'
   },
   editor: {
-    token: 'editor-token'
+    access: 'editor-token',
+    refresh: 'refresh-token'
   }
 }
 
 const users = {
   'admin-token': {
-    roles: ['admin'],
+    groups: ['admin'],
     introduction: 'I am a super administrator',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
     name: 'Super Admin'
   },
   'editor-token': {
-    roles: ['editor'],
+    groups: ['editor'],
     introduction: 'I am an editor',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
     name: 'Normal Editor'
@@ -26,7 +28,7 @@ const users = {
 module.exports = [
   // user login
   {
-    url: '/vue-admin-template/user/login',
+    url: '/system/token',
     type: 'post',
     response: config => {
       const { username } = config.body
@@ -35,13 +37,13 @@ module.exports = [
       // mock error
       if (!token) {
         return {
-          code: 60204,
+          code: 6204,
           message: 'Account and password are incorrect.'
         }
       }
 
       return {
-        code: 20000,
+        code: 2000,
         data: token
       }
     }
@@ -49,7 +51,7 @@ module.exports = [
 
   // get user info
   {
-    url: '/vue-admin-template/user/info\.*',
+    url: '/system/users/info',
     type: 'get',
     response: config => {
       const { token } = config.query
@@ -58,13 +60,13 @@ module.exports = [
       // mock error
       if (!info) {
         return {
-          code: 50008,
+          code: 5008,
           message: 'Login failed, unable to get user details.'
         }
       }
 
       return {
-        code: 20000,
+        code: 2000,
         data: info
       }
     }
@@ -76,7 +78,7 @@ module.exports = [
     type: 'post',
     response: _ => {
       return {
-        code: 20000,
+        code: 2000,
         data: 'success'
       }
     }

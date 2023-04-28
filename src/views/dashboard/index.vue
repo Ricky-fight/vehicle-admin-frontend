@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
     <div class="dashboard-text">name: {{ name }}</div>
-    <div class="dashboard-text">roles: <span v-for="role in roles" :key="role">{{ role }}</span></div>
+    <div class="dashboard-text">roles: <span v-for="group in groups" :key="group">{{ group }}</span></div>
     <Test test-prop="hello!" />
     <el-select v-model="value" filterable placeholder="请选择">
       <el-option
@@ -45,7 +45,7 @@ export default {
   computed: {
     ...mapGetters([
       'name',
-      'roles'
+      'groups'
     ])
   }
 }

@@ -4,29 +4,29 @@
       <!--      <el-row type="flex" justify="end">-->
       <el-form :model="queryForm" class="" label-width="100px">
         <el-row justify="end">
-          <el-col span="6">
+          <el-col :span="6">
             <el-form-item label="姓名">
               <el-input v-model="queryForm.name" placeholder="司机姓名" />
             </el-form-item>
           </el-col>
-          <el-col span="6">
+          <el-col :span="6">
             <el-form-item label="做单手机号">
               <el-input v-model="queryForm.phone1" placeholder="输入手机号" />
             </el-form-item>
           </el-col>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="地址">
               <el-input v-model="queryForm.address" placeholder="输入地址" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="6">
+          <el-col :span="6">
             <el-form-item label="车牌号">
               <el-input v-model="queryForm.driverName" placeholder="输入车牌号" />
             </el-form-item>
           </el-col>
-          <el-col span="6">
+          <el-col :span="6">
             <el-form-item label="车型">
               <el-cascader
                 v-model="queryForm.vehicleSeries"
@@ -36,7 +36,7 @@
               />
             </el-form-item>
           </el-col>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="驾驶证日期">
               <el-date-picker
                 v-model="queryForm.registerDate"
@@ -72,7 +72,6 @@
         element-loading-text="Loading"
         border
         fit
-        height="700"
         stripe
         highlight-current-row
       >
@@ -93,7 +92,7 @@
         </el-table-column>
         <el-table-column label="紧急联系人手机号" align="center" width="150">
           <template slot-scope="scope">
-            {{ scope.row.emergencyPhone }}
+            {{ scope.row.phone3 }}
           </template>
         </el-table-column>
         <el-table-column label="联系地址" align="center">
@@ -101,26 +100,26 @@
             {{ scope.row.address }}
           </template>
         </el-table-column>
-        <el-table-column label="驾驶证注册日期" width="150" align="center">
-          <template slot-scope="scope">
-            {{ scope.row.registerDate }}
-          </template>
-        </el-table-column>
-        <el-table-column label="车牌号" width="150" align="center">
-          <template slot-scope="scope">
-            {{ scope.row.vehicle.licence }}
-          </template>
-        </el-table-column>
-        <el-table-column label="车型" width="200" align="center">
-          <template slot-scope="scope">
-            {{ scope.row.vehicle.vehicleSeries }}
-          </template>
-        </el-table-column>
-        <el-table-column class-name="status-col" label="状态" width="110" align="center">
-          <template slot-scope="scope">
-            <el-tag :type="scope.row.status | statusFilter">{{ status(scope.row.vehicle) }}</el-tag>
-          </template>
-        </el-table-column>
+<!--        <el-table-column label="驾驶证注册日期" width="150" align="center">-->
+<!--          <template slot-scope="scope">-->
+<!--            {{ scope.row.registerDate }}-->
+<!--          </template>-->
+<!--        </el-table-column>-->
+<!--        <el-table-column label="车牌号" width="150" align="center">-->
+<!--          <template slot-scope="scope">-->
+<!--            {{ scope.row.vehicle.licence }}-->
+<!--          </template>-->
+<!--        </el-table-column>-->
+<!--        <el-table-column label="车型" width="200" align="center">-->
+<!--          <template slot-scope="scope">-->
+<!--            {{ scope.row.vehicle.vehicleSeries }}-->
+<!--          </template>-->
+<!--        </el-table-column>-->
+<!--        <el-table-column class-name="status-col" label="状态" width="110" align="center">-->
+<!--          <template slot-scope="scope">-->
+<!--            <el-tag :type="scope.row.status | statusFilter">{{ status(scope.row.vehicle) }}</el-tag>-->
+<!--          </template>-->
+<!--        </el-table-column>-->
         <el-table-column label="操作" width="110" align="center">
           <template slot-scope="scope">
             <el-link type="primary" style="margin-right: 5px" @click="(event) => onUpdate(scope.row, event)">更新</el-link>
@@ -134,7 +133,7 @@
         :page-sizes="[10, 20, 50, 100]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="list.length"
+        :total="total"
         align="right"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -143,38 +142,38 @@
     <el-dialog title="新建司机" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
       <el-form :model="createForm" label-width="125px">
         <el-row>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="姓名">
               <el-input v-model.trim="createForm.name" placeholder="输入姓名" clearable />
             </el-form-item>
           </el-col>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="做单手机号">
               <el-input v-model.trim="createForm.phone1" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="联系手机号">
               <el-input v-model.trim="createForm.phone2" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="紧急联系人">
               <el-input v-model.trim="createForm.emergencyPhone" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="24">
+          <el-col :span="24">
             <el-form-item label="联系地址" clearable>
               <el-input v-model="createForm.address" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="24">
+          <el-col :span="24">
             <el-form-item label="行驶证注册日期">
               <el-date-picker
                 v-model="createForm.registerDate"
@@ -186,46 +185,46 @@
           </el-col>
         </el-row>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <:span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>
+      </:span>
     </el-dialog>
     <el-dialog title="更新司机" :visible.sync="dialog2Visible" width="40%" :before-close="handleClose">
       <el-form :model="updateForm" label-width="125px">
         <el-row>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="姓名">
               <el-input v-model.trim="updateForm.name" placeholder="输入姓名" clearable />
             </el-form-item>
           </el-col>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="做单手机号">
               <el-input v-model.trim="updateForm.phone1" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="联系手机号">
               <el-input v-model.trim="updateForm.phone2" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
-          <el-col span="12">
+          <el-col :span="12">
             <el-form-item label="紧急联系人">
               <el-input v-model.trim="updateForm.emergencyPhone" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="24">
+          <el-col :span="24">
             <el-form-item label="联系地址" clearable>
               <el-input v-model="updateForm.address" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col span="24">
+          <el-col :span="24">
             <el-form-item label="行驶证注册日期">
               <el-date-picker
                 v-model="updateForm.registerDate"
@@ -237,10 +236,10 @@
           </el-col>
         </el-row>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <:span slot="footer" class="dialog-footer">
         <el-button @click="dialog2Visible = false">取 消</el-button>
         <el-button type="primary" @click="dialog2Visible = false">确 定</el-button>
-      </span>
+      </:span>
     </el-dialog>
   </div>
 </template>
@@ -264,6 +263,7 @@ export default {
   },
   data() {
     return {
+      total: 0,
       renderList: null,
       list: null,
       listLoading: true,
@@ -371,24 +371,26 @@ export default {
   },
   created() {
     this.fetchData()
-    this.fetchVehicleSeries()
+    // this.fetchVehicleSeries()
   },
   methods: {
     fetchData() {
       this.listLoading = true
       getDriverList().then(response => {
-        this.list = response.data.items
+        this.total = response.data.count
+        this.list = response.data.results
         this.pageSize = 10 // TODO:可选择的分页条数
         this.renderList = this.list.slice(0, min(this.pageSize, this.list.length))
+        console.log(this.renderList)
         this.listLoading = false
         // console.log(this.renderList)
       })
     },
-    fetchVehicleSeries() {
-      getVehicleSeriesOptions().then(response => {
-        this.vehicleSeriesOptions = response.data.items
-      })
-    },
+    // fetchVehicleSeries() {
+    //   getVehicleSeriesOptions().then(response => {
+    //     this.vehicleSeriesOptions = response.data.items
+    //   })
+    // },
     onSubmit() {
       console.log('submit!')
     },
