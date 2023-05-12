@@ -40,18 +40,14 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 2000) {
-      Message({
-        message: res.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 5008 || res.code === 5012 || res.code === 5014) {
-        // to re-login
+    if (!res) return res
+    switch (res.code) {
+      case 2000:
+        return res
+      case 4030:
+      case 5008:
+      case 5012:
+      case 5014:
         MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
           confirmButtonText: 'Re-Login',
           cancelButtonText: 'Cancel',
@@ -61,11 +57,38 @@ service.interceptors.response.use(
             location.reload()
           })
         })
-      }
-      return Promise.reject(new Error(res.message || 'Error'))
-    } else {
-      return res
+        break
+      case 4000: // bad request
+        for (const error in res.errors) {
+          for (const message in res.errors[error]) {
+            Message.error(message)
+          }
+        }
+        return Promise.reject(new Error('请求失败：参数错误'))
+      case 4050:
+        return Promise.reject(new Error('服务器不支持该接口'))
     }
+    return res
+    // if the custom code is not 20000, it is judged as an error.
+    // if (res.code && res.code !== 2000) {
+    //   // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
+    //   if (res.code === 5008 || res.code === 5012 || res.code === 5014) {
+    //     // to re-login
+    //     MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
+    //       confirmButtonText: 'Re-Login',
+    //       cancelButtonText: 'Cancel',
+    //       type: 'warning'
+    //     }).then(() => {
+    //       store.dispatch('user/resetToken').then(() => {
+    //         location.reload()
+    //       })
+    //     })
+    //   }
+    //   // return Promise.reject(new Error(res.message || 'Error'))
+    //   return res
+    // } else {
+    //   return res
+    // }
   },
   error => {
     console.log('err' + error) // for debug

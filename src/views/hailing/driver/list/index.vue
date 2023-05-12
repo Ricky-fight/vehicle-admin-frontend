@@ -185,10 +185,10 @@
           </el-col>
         </el-row>
       </el-form>
-      <:span slot="footer" class="dialog-footer">
+      <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </:span>
+      </span>
     </el-dialog>
     <el-dialog title="更新司机" :visible.sync="dialog2Visible" width="40%" :before-close="handleClose">
       <el-form :model="updateForm" label-width="125px">

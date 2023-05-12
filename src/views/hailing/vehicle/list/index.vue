@@ -5,17 +5,24 @@
         <el-row justify="end">
           <el-col :span="6">
             <el-form-item label="车型">
-              <el-cascader
-                v-model="queryForm.vehicleSeries"
-                :options="vehicleSeriesOptions"
+              <el-select
+                v-model="queryForm.type"
+                placeholder="选择车型"
                 @change="handleVehicleSeriesChange"
-              />
+              >
+                <el-option
+                  v-for="item in vehicleSeriesOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="颜色">
               <el-select v-model="queryForm.color" placeholder="车身颜色">
-                <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
+                <el-option v-for="item in colorOptions" :key="item.value" :value="item.value" :label="item.label" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -47,7 +54,7 @@
       </el-form>
       <el-form label-width="75px" inline align="right">
         <el-form-item class="form-btns">
-          <el-button type="primary" @click="onSubmit">查询</el-button>
+          <el-button type="primary" @click="onSubmitQuery">查询</el-button>
         </el-form-item>
         <el-form-item class="form-btns">
           <el-button @click="onReset">重置</el-button>
@@ -79,7 +86,7 @@
         </el-table-column>
         <el-table-column label="颜色" align="center" width="50">
           <template slot-scope="scope">
-            {{ colorMap[scope.row.color] }}
+            {{ scope.row.color | colorFilter }}
           </template>
         </el-table-column>
         <el-table-column label="车架号" width="200" align="center">
@@ -99,12 +106,12 @@
         </el-table-column>
         <el-table-column label="行驶证注册日期" width="150" align="center">
           <template slot-scope="scope">
-            {{ scope.row.registerDate }}
+            {{ scope.row.certificate.registerDate }}
           </template>
         </el-table-column>
         <el-table-column label="检检有效期" width="150" align="center">
           <template slot-scope="scope">
-            {{ scope.row.inspectionExpired }}
+            {{ scope.row.certificate.inspectionDate }}
           </template>
         </el-table-column>
         <el-table-column label="司机" width="110" align="center">
@@ -143,59 +150,68 @@
       />
     </el-card>
     <el-drawer
-      :title="(formType | titleFilter) + '车辆'"
+      :title="formType|titleFilter|addVehicleFilter"
       :visible.sync="drawerVisible"
       width="50%"
       :before-close="handleClose"
     >
       <div class="drawer-container">
-        <span>{{ temp }}</span>
-        <el-form :model="temp" label-width="100px" label-position="left">
-          <el-form-item label="序号">
-            <el-input v-model="temp.id" placeholder="系统内部序号" disabled />
+        <el-form :model="formData" ref="formData" :rules="rules" label-width="100px" label-position="left">
+          <el-form-item label="序号" prop="id">
+            <el-input v-model="formData.id" placeholder="系统内部序号" disabled />
           </el-form-item>
-          <el-form-item label="车牌号">
-            <el-input v-model.trim="temp.licence" placeholder="输入车牌号" clearable />
+          <el-form-item label="车牌号" prop="licenceNo">
+            <el-input v-model.trim="formData.licenceNo" placeholder="输入车牌号" clearable />
           </el-form-item>
-          <el-form-item label="颜色">
-            <el-select v-model="temp.color" placeholder="选择颜色">
-              <el-option v-for="(colorLabel, colorCode) in colorMap" :key="colorCode" :value="colorCode" :label="colorLabel" />
+          <el-form-item label="颜色" prop="color">
+            <el-select v-model="formData.color" placeholder="选择颜色">
+              <el-option v-for="item in colorOptions" :key="item.value" :value="item.value" :label="item.label" />
             </el-select>
           </el-form-item>
-          <el-form-item label="车架号">
-            <el-input v-model.trim="temp.vin" placeholder="输入车架号" clearable />
+          <el-form-item label="车架号" prop="vin">
+            <el-input v-model.trim="formData.vin" placeholder="输入车架号" clearable />
           </el-form-item>
-          <el-form-item label="车型">
-            <el-cascader
-              v-model="temp.vehicleSeries"
+          <el-form-item label="发动机号" prop="ein">
+            <el-input v-model.trim="formData.ein" placeholder="输入发动机号" clearable />
+          </el-form-item>
+          <el-form-item label="车型" prop="type">
+            <el-select
+              v-model="formData.type"
               placeholder="选择车型"
-              :options="vehicleSeriesOptions"
               @change="handleVehicleSeriesChange"
-            />
+            >
+              <el-option
+                v-for="item in vehicleSeriesOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
             <el-button type="text" style="margin-left: 10px" @click="onCreate2VehicleSeries">新增</el-button>
           </el-form-item>
-
-          <el-form-item label="行驶证日期">
+          <el-form-item label="行驶证日期" prop="certificate.registerDate">
             <el-date-picker
-              v-model="temp.registerDate"
+              v-model="formData.certificate.registerDate"
               align="right"
               type="date"
               placeholder="选择日期"
+              value-format="yyyy-MM-dd"
               :picker-options="pickerOptions1"
             />
           </el-form-item>
-          <el-form-item label="检验有效期">
+          <el-form-item label="检验有效期" prop="certificate.inspectionDate">
             <el-date-picker
-              v-model="temp.inspectionExpired"
+              v-model="formData.certificate.inspectionDate"
               align="right"
               type="date"
               placeholder="选择日期"
+              value-format="yyyy-MM-dd"
               :picker-options="pickerOptions2"
             />
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="drawerVisible = false">取 消</el-button>
+          <el-button @click="handleClose">取 消</el-button>
           <el-button type="primary" @click="handleDrawerConfirm">确 定</el-button>
         </div>
         <el-drawer
@@ -206,31 +222,23 @@
           append-to-body
         >
           <div class="drawer-container">
-            <el-form :model="innerTemp" label-position="left" label-width="100px">
+            <el-form :model="innerFormData" label-position="left" label-width="100px">
               <el-form-item label="品牌">
-                <el-input v-model.trim="innerTemp.brand" clearable />
+                <el-input v-model.trim="innerFormData.brand" clearable />
               </el-form-item>
               <el-form-item label="车系">
-                <el-input v-model.trim="innerTemp.vehicleSeries" clearable />
+                <el-input v-model.trim="innerFormData.series" clearable />
               </el-form-item>
-              <el-form-item label="基础押金">
-                <el-input v-model="innerTemp.baseDeposit" placeholder="输入金额" clearable>
-                  <template slot="append">元</template>
-                </el-input>
+              <el-form-item label="厂牌规格">
+                <el-input v-model.trim="innerFormData.model" clearable />
               </el-form-item>
-              <el-form-item label="基础月付租金">
-                <el-input v-model="innerTemp.baseMonthlyRent" placeholder="输入金额" clearable>
-                  <template slot="append">元</template>
-                </el-input>
-              </el-form-item>
-              <el-form-item label="基础周付租金">
-                <el-input v-model="innerTemp.baseWeeklyRent" placeholder="输入金额" clearable>
-                  <template slot="append">元</template>
+              <el-form-item label="核定载人数">
+                <el-input v-model="innerFormData.seatCount" placeholder="输入数字" clearable>
                 </el-input>
               </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-              <el-button @click="innerDrawerVisible = false">取 消</el-button>
+              <el-button @click="handle2Close">取 消</el-button>
               <el-button type="primary" @click="handleInnerConfirm">确 定</el-button>
             </span>
           </div>
@@ -242,8 +250,15 @@
 </template>
 
 <script>
-import { getVehicleList, getVehicleSeriesOptions, updateVehicle } from '@/api/hailing/vehicle'
-import { colorFilter, colorMap, statusMap, statusTagFilter, titleFilter, vehicleStatusFilter } from '@/filters'
+import {
+  createVehicle, createVehicleType,
+  deleteVehicle,
+  getVehicleList,
+  getVehicleSeriesOptions,
+  updateVehicle
+} from '@/api/hailing/vehicle'
+import { colorFilter, statusMap, statusTagFilter, titleFilter, vehicleStatusFilter } from '@/filters'
+import { Message } from 'element-ui'
 function min(a, b) {
   return a < b ? a : b
 }
@@ -252,7 +267,10 @@ export default {
     statusFilter: statusTagFilter,
     titleFilter,
     colorFilter,
-    vehicleStatusFilter
+    vehicleStatusFilter,
+    addVehicleFilter(value) {
+      return value + '车辆'
+    }
   },
   data() {
     return {
@@ -261,44 +279,51 @@ export default {
       list: null,
       listLoading: true,
       queryForm: {
-        vehicleSeries: [],
+        type: '',
         color: '',
         vin: '',
-        licence: '',
+        licenceNo: '',
         driverName: ''
       },
       formType: '',
-      createForm: {
-        vehicleSeries: [],
-        color: '',
-        vin: '',
-        licence: '',
-        driverName: '',
-        inspectionExpired: '',
-        registerDate: ''
-      },
-      updateForm: {
+      formData: {
         id: '',
-        vehicleSeries: [],
+        type: null,
+        certificate: {
+          registerDate: '',
+          inspectionDate: ''
+        },
+        licenceNo: '',
         color: '',
         vin: '',
-        licence: '',
-        driverName: '',
-        inspectionExpired: '',
-        registerDate: ''
+        ein: '',
+        driverName: ''
       },
-      temp: {
-        id: '',
-        vehicleSeries: [],
-        color: '',
-        vin: '',
-        licence: '',
-        driverName: '',
-        inspectionExpired: '',
-        registerDate: ''
+      rules: {
+        type: {
+          required: true, message: '请选择车型', trigger: 'change'
+        },
+        'certificate.registerDate': {
+          required: true, message: '请选择行驶证注册日期', trigger: 'change'
+        },
+        'certificate.inspectionDate': {
+          required: true, message: '请选择行驶证检验有效期日期', trigger: 'change'
+        },
+        licenceNo: {
+          required: true, message: '请输入车牌号', trigger: 'change'
+        },
+        color: {
+          required: true, message: '请输入车身颜色', trigger: 'change'
+        },
+        vin: {
+          required: true, message: '请输入车架号', trigger: 'change'
+        },
+        ein: {
+          required: true, message: '请输入发动机号', trigger: 'change'
+        }
       },
-
       vehicleSeriesOptions: [],
+      colorOptions: {},
       pickerOptions1: {
         shortcuts: [{
           text: '今天',
@@ -338,12 +363,10 @@ export default {
           }
         }]
       },
-      innerTemp: {
+      innerFormData: {
         brand: '',
-        vehicleSeries: '',
-        baseDeposit: '',
-        baseMonthlyRent: '',
-        baseWeeklyRent: ''
+        series: '',
+        seatCount: '',
       },
       pageSize: null,
       currentPage: null,
@@ -355,9 +378,6 @@ export default {
     }
   },
   computed: {
-    colorMap() {
-      return colorMap
-    },
     statusMap() {
       return statusMap
     }
@@ -365,12 +385,43 @@ export default {
   created() {
     this.fetchData()
     this.fetchVehicleSeries()
+    this.colorOptions = [
+      {
+        value: 1,
+        label: '黑'
+      },
+      {
+        value: 2,
+        label: '白'
+      },
+      {
+        value: 3,
+        label: '灰'
+      }
+    ]
+    // this.formData = {
+    //   id: '',
+    //   type: null,
+    //   certificate: {
+    //     registerDate: '',
+    //     inspectionDate: ''
+    //   },
+    //   licenceNo: '',
+    //   color: '',
+    //   vin: '',
+    //   ein: '',
+    //   driverName: ''
+    // }
+  },
+  mounted() {
+    console.log('mounted')
+    console.log(this.formData)
+    // console.log(this.formData.certificate)
   },
   methods: {
-    titleFilter,
     fetchData() {
       this.listLoading = true
-      getVehicleList().then(response => {
+      getVehicleList(this.queryForm).then(response => {
         this.total = response.data.count
         this.list = response.data.results
         this.pageSize = 10 // TODO:可选择的分页条数
@@ -385,11 +436,17 @@ export default {
     },
     fetchVehicleSeries() {
       getVehicleSeriesOptions().then(response => {
-        this.vehicleSeriesOptions = response.data.items
+        this.vehicleSeriesOptions = response.data || []
+        console.log('车型选项')
+        console.log(response.data)
       })
     },
-    onSubmit() {
-      console.log('submit!')
+    refresh() {
+      this.fetchData()
+      this.fetchVehicleSeries()
+    },
+    onSubmitQuery() {
+      this.fetchData()
     },
     onReset() {
       console.log(this.queryForm)
@@ -413,8 +470,10 @@ export default {
     },
     onCreate() {
       this.formType = 'create'
-      this.temp = {}
       this.drawerVisible = true
+      this.$nextTick(() => {
+        this.$refs['formData'].resetFields()
+      })
     },
     onCreateVehicleSeries() {
       this.dialog2Visible = true
@@ -426,39 +485,67 @@ export default {
       this.dialog2Visible = false
     },
     handleInnerConfirm() {
+      createVehicleType(this.innerFormData).then(response => {
+        Message.success('新增车型成功')
+      })
       this.innerDrawerVisible = false
     },
     onUpdate(entity) {
-      this.temp = entity
+      this.formType = 'update'
       this.drawerVisible = true
+      this.$nextTick(() => {
+        this.formData.id = entity.id
+        this.formData.vin = entity.vin
+        this.formData.ein = entity.ein
+        this.formData.type = entity.type.id
+        this.formData.licenceNo = entity.licenceNo
+        this.formData.color = entity.color
+        this.formData.certificate.registerDate = entity.certificate.registerDate
+        this.formData.certificate.inspectionDate = entity.certificate.inspectionDate
+      })
     },
     handleClose(done) {
       this.$confirm('确认关闭？')
         .then(_ => {
+          this.$refs.formData.resetFields()
+          this.drawerVisible = false
           done()
         })
         .catch(_ => { })
     },
     handleDrawerConfirm() {
       // TODO: 提交
-      switch (this.formType) {
-        // eslint-disable-next-line no-empty
-        // case 'create': {
-        // }
-        //   break
-        case 'update':
-          updateVehicle(this.temp.id, this.temp).then(() => {
-            this.$message({
-              message: '更新车辆成功',
-              type: 'success'
-            })
-            this.$message.success('更新车辆成功')
-          })
-          break
-        default:
-          break
-      }
-      this.drawerVisible = false
+      this.$refs['formData'].validate((valid) => {
+        if (!valid) {
+          Message.error('请检查表单项！')
+        } else {
+          switch (this.formType) {
+            // eslint-disable-next-line no-empty
+            // case 'create': {
+            // }
+            //   break
+            case 'update':
+              updateVehicle(this.formData.id, this.formData).then(() => {
+                this.$message.success('更新车辆成功')
+                this.fetchVehicleSeries()
+                this.fetchData()
+              }).catch(error => {
+                Message.error(error.message)
+              })
+              break
+            case 'create':
+              createVehicle(this.formData).then(() => {
+                this.$message.success('创建车辆成功')
+                this.fetchVehicleSeries()
+                this.fetchData()
+              })
+              break
+            default:
+              break
+          }
+          this.drawerVisible = false
+        }
+      })
     },
     handle2Close(done) {
       this.$confirm('确认2关闭？')
@@ -468,7 +555,7 @@ export default {
         .catch(_ => { })
     },
     handleVehicleSeriesChange(value) {
-      console.log(value)
+      console.log('选中车型id：' + value)
     },
     onDelete(id, event) {
       this.$confirm('此操作将永久删除该车辆, 是否继续?', '提示', {
@@ -476,9 +563,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        deleteVehicle(id).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          refresh()
         })
       }).catch(() => {
         this.$message({
