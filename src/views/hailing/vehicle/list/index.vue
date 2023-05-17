@@ -47,7 +47,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="车牌号">
-              <el-input v-model="queryForm.licence" placeholder="车牌号" />
+              <el-input v-model="queryForm.licenceNo" placeholder="车牌号" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -259,6 +259,7 @@ import {
 } from '@/api/hailing/vehicle'
 import { colorFilter, statusMap, statusTagFilter, titleFilter, vehicleStatusFilter } from '@/filters'
 import { Message } from 'element-ui'
+import { vehicleTemplate } from '@/utils/template'
 function min(a, b) {
   return a < b ? a : b
 }
@@ -286,19 +287,7 @@ export default {
         driverName: ''
       },
       formType: '',
-      formData: {
-        id: '',
-        type: null,
-        certificate: {
-          registerDate: '',
-          inspectionDate: ''
-        },
-        licenceNo: '',
-        color: '',
-        vin: '',
-        ein: '',
-        driverName: ''
-      },
+      formData: vehicleTemplate,
       rules: {
         type: {
           required: true, message: '请选择车型', trigger: 'change'
@@ -471,9 +460,7 @@ export default {
     onCreate() {
       this.formType = 'create'
       this.drawerVisible = true
-      this.$nextTick(() => {
-        this.$refs['formData'].resetFields()
-      })
+      this.$refs['formData'].resetFields()
     },
     onCreateVehicleSeries() {
       this.dialog2Visible = true
@@ -514,7 +501,6 @@ export default {
         .catch(_ => { })
     },
     handleDrawerConfirm() {
-      // TODO: 提交
       this.$refs['formData'].validate((valid) => {
         if (!valid) {
           Message.error('请检查表单项！')
@@ -568,7 +554,7 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
-          refresh()
+          this.refresh()
         })
       }).catch(() => {
         this.$message({
