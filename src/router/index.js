@@ -107,6 +107,12 @@ export const constantRoutes = [
             name: 'New',
             component: () => import('@/views/hailing/contrast/create/index'),
             meta: { title: '录入合同', icon: 'el-icon-document-add' }
+          },
+          {
+            path: 'list',
+            name: 'list',
+            component: () => import('@/views/hailing/contrast/list/index'),
+            meta: { title: '合同查询', icon: 'el-icon-document' }
           }
         ],
         meta: { title: '租赁合同管理', icon: 'el-icon-document' }

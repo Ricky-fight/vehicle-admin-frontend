@@ -55,7 +55,7 @@
       </el-form>
       <el-form label-width="75px" inline align="right">
         <el-form-item class="form-btns">
-          <el-button type="primary" @click="onSubmit">查询</el-button>
+          <el-button type="primary" @click="onSubmitQuery">查询</el-button>
         </el-form-item>
         <el-form-item class="form-btns">
           <el-button @click="onReset">重置</el-button>
@@ -80,6 +80,11 @@
             {{ scope.row.name }}
           </template>
         </el-table-column>
+        <el-table-column label="身份证号" align="center" width="200">
+          <template slot-scope="scope">
+            {{ scope.row.idNo }}
+          </template>
+        </el-table-column>
         <el-table-column label="做单手机号" align="center" width="150">
           <template slot-scope="scope">
             {{ scope.row.phone1 }}
@@ -100,26 +105,11 @@
             {{ scope.row.address }}
           </template>
         </el-table-column>
-<!--        <el-table-column label="驾驶证注册日期" width="150" align="center">-->
-<!--          <template slot-scope="scope">-->
-<!--            {{ scope.row.registerDate }}-->
-<!--          </template>-->
-<!--        </el-table-column>-->
-<!--        <el-table-column label="车牌号" width="150" align="center">-->
-<!--          <template slot-scope="scope">-->
-<!--            {{ scope.row.vehicle.licence }}-->
-<!--          </template>-->
-<!--        </el-table-column>-->
-<!--        <el-table-column label="车型" width="200" align="center">-->
-<!--          <template slot-scope="scope">-->
-<!--            {{ scope.row.vehicle.vehicleSeries }}-->
-<!--          </template>-->
-<!--        </el-table-column>-->
-<!--        <el-table-column class-name="status-col" label="状态" width="110" align="center">-->
-<!--          <template slot-scope="scope">-->
-<!--            <el-tag :type="scope.row.status | statusFilter">{{ status(scope.row.vehicle) }}</el-tag>-->
-<!--          </template>-->
-<!--        </el-table-column>-->
+        <el-table-column label="绑定车辆" align="center" width="150">
+          <template slot-scope="scope">
+            {{  }}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="110" align="center">
           <template slot-scope="scope">
             <el-link type="primary" style="margin-right: 5px" @click="(event) => onUpdate(scope.row, event)">更新</el-link>
@@ -139,119 +129,79 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
-    <el-dialog title="新建司机" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
-      <el-form :model="createForm" label-width="125px">
+    <el-dialog :title="formType|titleFilter|appendFilter" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
+      <el-form ref="formData" :model="formData" :rules="rules" label-width="125px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="姓名">
-              <el-input v-model.trim="createForm.name" placeholder="输入姓名" clearable />
+            <el-form-item label="姓名" prop="name">
+              <el-input v-model.trim="formData.name" placeholder="输入姓名" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="做单手机号">
-              <el-input v-model.trim="createForm.phone1" placeholder="输入手机号" clearable />
+            <el-form-item label="身份证号" prop="idNo">
+              <el-input v-model.trim="formData.idNo" placeholder="输入身份证号" clearable />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="联系手机号">
-              <el-input v-model.trim="createForm.phone2" placeholder="输入手机号" clearable />
+            <el-form-item label="做单手机号" prop="phone1">
+              <el-input v-model.trim="formData.phone1" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="紧急联系人">
-              <el-input v-model.trim="createForm.emergencyPhone" placeholder="输入手机号" clearable />
+            <el-form-item label="联系手机号" prop="phone2">
+              <el-input v-model.trim="formData.phone2" placeholder="输入手机号" clearable />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="24">
-            <el-form-item label="联系地址" clearable>
-              <el-input v-model="createForm.address" />
+          <el-col :span="12">
+            <el-form-item label="紧急联系人" prop="phone3">
+              <el-input v-model.trim="formData.phone3" placeholder="输入手机号" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="联系地址" prop="address" clearable>
+              <el-input v-model="formData.address" placeholder="输入地址" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="行驶证注册日期">
-              <el-date-picker
-                v-model="createForm.registerDate"
-                align="right"
-                type="date"
-                placeholder="选择日期"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+<!--        <el-row>-->
+<!--          <el-col :span="24">-->
+<!--            <el-form-item label="驾驶证初登日期" prop="registerDate">-->
+<!--              <el-date-picker-->
+<!--                v-model="createForm.registerDate"-->
+<!--                align="right"-->
+<!--                type="date"-->
+<!--                placeholder="选择日期"-->
+<!--              />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--        </el-row>-->
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="handleFormConfirm">确 定</el-button>
       </span>
-    </el-dialog>
-    <el-dialog title="更新司机" :visible.sync="dialog2Visible" width="40%" :before-close="handleClose">
-      <el-form :model="updateForm" label-width="125px">
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="姓名">
-              <el-input v-model.trim="updateForm.name" placeholder="输入姓名" clearable />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="做单手机号">
-              <el-input v-model.trim="updateForm.phone1" placeholder="输入手机号" clearable />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="联系手机号">
-              <el-input v-model.trim="updateForm.phone2" placeholder="输入手机号" clearable />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="紧急联系人">
-              <el-input v-model.trim="updateForm.emergencyPhone" placeholder="输入手机号" clearable />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="联系地址" clearable>
-              <el-input v-model="updateForm.address" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="行驶证注册日期">
-              <el-date-picker
-                v-model="updateForm.registerDate"
-                align="right"
-                type="date"
-                placeholder="选择日期"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <:span slot="footer" class="dialog-footer">
-        <el-button @click="dialog2Visible = false">取 消</el-button>
-        <el-button type="primary" @click="dialog2Visible = false">确 定</el-button>
-      </:span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getVehicleSeriesOptions } from '@/api/hailing/vehicle'
-import { getDriverList } from '@/api/hailing/driver'
+import { createDriver, deleteDriver, getDriverList, updateDriver } from '@/api/hailing/driver'
+import { titleFilter } from '@/filters'
+import { Message } from 'element-ui'
+import { driverTemplate } from '@/utils/template'
 function min(a, b) {
   return a < b ? a : b
 }
 export default {
   filters: {
+    titleFilter,
+    appendFilter(value) {
+      return value + '司机'
+    },
     statusFilter(status) {
       const statusMap = {
         1: 'success',
@@ -302,22 +252,15 @@ export default {
           }
         }]
       },
-      createForm: {
-        name: '',
-        phone1: '',
-        phone2: '',
-        emergencyPhone: '',
-        address: '',
-        registerDate: ''
-      },
-      updateForm: {
-        vehicleSeries: [],
-        color: '',
-        vin: '',
-        licence: '',
-        driverName: '',
-        inspectionExpired: '',
-        registerDate: ''
+      formType: '',
+      formData: driverTemplate,
+      rules: {
+        name: {
+          required: true, message: '姓名为必填项', trigger: 'blur'
+        },
+        idNo: {
+          required: true, message: '身份证号为必填项', trigger: 'blur'
+        }
       },
       vehicleSeriesOptions: [],
       pickerOptions1: {
@@ -371,28 +314,21 @@ export default {
   },
   created() {
     this.fetchData()
-    // this.fetchVehicleSeries()
   },
   methods: {
     fetchData() {
       this.listLoading = true
-      getDriverList().then(response => {
+      getDriverList(this.queryForm).then(response => {
         this.total = response.data.count
         this.list = response.data.results
         this.pageSize = 10 // TODO:可选择的分页条数
         this.renderList = this.list.slice(0, min(this.pageSize, this.list.length))
         console.log(this.renderList)
         this.listLoading = false
-        // console.log(this.renderList)
       })
     },
-    // fetchVehicleSeries() {
-    //   getVehicleSeriesOptions().then(response => {
-    //     this.vehicleSeriesOptions = response.data.items
-    //   })
-    // },
-    onSubmit() {
-      console.log('submit!')
+    onSubmitQuery() {
+      this.fetchData()
     },
     onReset() {
       console.log(this.queryForm)
@@ -415,14 +351,46 @@ export default {
       console.log(`当前页: ${val}`)
     },
     onCreate() {
+      this.formType = 'create'
       this.dialogVisible = true
+      this.$nextTick(() => {
+        this.$refs['formData'].resetFields()
+      })
     },
     handleClose(done) {
       this.$confirm('确认关闭？')
         .then(_ => {
+          this.dialogVisible = false
           done()
         })
         .catch(_ => { })
+    },
+    handleFormConfirm() {
+      this.$refs['formData'].validate((valid) => {
+        if (!valid) {
+          Message.error('请检查表单项！')
+        } else {
+          switch (this.formType) {
+            case 'update':
+              updateDriver(this.formData.id, this.formData).then(() => {
+                this.$message.success('更新司机成功')
+                this.fetchData()
+              }).catch(error => {
+                Message.error(error.message)
+              })
+              break
+            case 'create':
+              createDriver(this.formData).then(() => {
+                this.$message.success('创建司机成功')
+                this.fetchData()
+              })
+              break
+            default:
+              break
+          }
+          this.drawerVisible = false
+        }
+      })
     },
     handleVehicleSeriesChange(value) {
       console.log(value)
@@ -433,19 +401,25 @@ export default {
       }
       return this.statusMap[0]
     },
-    onUpdate(entity, event) {
-      this.updateForm.driverName =
-      this.dialog2Visible = true
+    onUpdate(entity) {
+      this.formType = 'update'
+      this.dialogVisible = true
+      this.$nextTick(() => {
+        this.formData = { ...entity }
+      })
     },
-    onDelete(id, event) {
+    onDelete(id) {
       this.$confirm('此操作将永久删除该司机, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        deleteDriver(id).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.fetchData()
         })
       }).catch(() => {
         this.$message({
