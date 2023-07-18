@@ -9,107 +9,113 @@
     </el-card>
     <el-card v-if="step === 1">
       <h2>录入合同</h2>
-      <el-form ref="form" :model="form" label-width="90px" label-position="left">
+      <el-form ref="formData" :model="formData" label-width="90px" label-position="left">
         <el-divider content-position="center">司机信息</el-divider>
         <el-form-item label="司机">
           <div>
             <el-select
-              v-model="form.driver.id"
+              ref="driverInput"
+              v-model="formData.driver"
               class="driver-select-input"
               popper-class="driver-select"
               placeholder="请输入司机姓名"
               filterable
               remote
-              :remote-method="remoteMethod"
+              :remote-method="fetchDriverOptions"
               :loading="driverLoading"
               clearable
-              @change="handleSelect"
-              @clear="handleClear"
+              @change="handleSelectDriver"
+              @clear="handleDriverClear"
             >
               <el-option
-                v-for="driver in options"
-                :key="driver.value"
-                :label="driver.label"
-                :value="driver.value"
+                v-for="driver in driverOptions"
+                :key="driver.id"
+                :label="driver.name"
+                :value="driver.id"
               >
-                <span class="name">{{ driver.label }}</span>
-                <span class="id-no">{{ driver.identificationNo }}</span>
+                <span class="name">{{ driver.name }}</span>
+                <span class="id-no">{{ driver.idNo }}</span>
               </el-option>
             </el-select>
             <el-link type="primary" style="margin-left: 5px" href="#/hailing/driver" target="_blank" :underline="false">去新增/编辑司机信息</el-link>
           </div>
           <div class="driver-warn">
-            <span v-show="form.driver.id">{{ 'WIP: 提示信息(如：该司机已有生效合同)' }}</span>
+            <span v-show="formData.driver">{{ 'WIP: 提示信息(如：该司机已有生效合同)' }}</span>
           </div>
         </el-form-item>
         <el-descriptions>
-          <el-descriptions-item label="身份证号">{{ form.driver.identificationNo }}</el-descriptions-item>
-          <el-descriptions-item label="做单手机号">{{ form.driver.phone1 }}</el-descriptions-item>
-          <el-descriptions-item label="联系手机号">{{ form.driver.phone2 }}</el-descriptions-item>
-          <el-descriptions-item label="紧急手机号">{{ form.driver.emergencyPhone }}</el-descriptions-item>
-          <el-descriptions-item label="联系地址">{{ form.driver.address }}</el-descriptions-item>
-          <el-descriptions-item label="驾驶证注册日期">{{ form.driver.registerDate }}</el-descriptions-item>
+          <el-descriptions-item label="身份证号">{{ selectedDriver.idNo }}</el-descriptions-item>
+          <el-descriptions-item label="做单手机号">{{ selectedDriver.phone1 }}</el-descriptions-item>
+          <el-descriptions-item label="联系手机号">{{ selectedDriver.phone2 }}</el-descriptions-item>
+          <el-descriptions-item label="紧急手机号">{{ selectedDriver.phone3 }}</el-descriptions-item>
+          <el-descriptions-item label="联系地址">{{ selectedDriver.address }}</el-descriptions-item>
+<!--          <el-descriptions-item label="驾驶证注册日期">{{ formData.driver.registerDate }}</el-descriptions-item>-->
         </el-descriptions>
         <el-divider content-position="center">车辆信息</el-divider>
         <el-form-item label="车辆">
           <div>
             <el-select
-              v-model="form.vehicle.id"
+              ref="vehicleInput"
+              v-model="formData.vehicle"
               class="vehicle-select-input"
               popper-class="vehicle-select"
               placeholder="请输入车牌号"
               filterable
               remote
-              :remote-method="remoteMethod2"
+              :remote-method="fetchVehicleOptions"
               :loading="vehicleLoading"
               clearable
-              @change="handleSelect2"
-              @clear="handleClear2"
+              @change="handleSelectVehicle"
+              @clear="handleVehicleClear"
             >
               <el-option
-                v-for="vehicle in options2"
+                v-for="vehicle in vehicleOptions"
                 :key="vehicle.id"
-                :label="vehicle.licence"
+                :label="vehicle.licenceNo"
                 :value="vehicle.id"
               >
-                <div class="licence">{{ vehicle.licence }}</div>
+                <div class="licence">{{ vehicle.licenceNo }}</div>
                 <span class="vin">{{ vehicle.vin }}</span>
-                <span class="series">{{ vehicle.brand + '/' + vehicle.vehicleSeries }}</span>
+                <span class="series">{{vehicle.color | colorFilter }}色</span>
+                <span class="series">{{ vehicle.type.brand + '/' + vehicle.type.series }} </span>
               </el-option>
             </el-select>
           </div>
           <div class="driver-warn">
-            <span v-show="form.vehicle.id">{{ 'WIP: 提示信息(如：该车辆已出车)' }}</span>
+            <span v-show="selectedVehicle.id">{{ 'WIP: 提示信息(如：该车辆已出车)' }}</span>
           </div>
         </el-form-item>
         <el-descriptions>
-          <el-descriptions-item label="颜色">{{ form.vehicle.color | colorFilter }}</el-descriptions-item>
-          <el-descriptions-item label="品牌">{{ form.vehicle.brand }}</el-descriptions-item>
-          <el-descriptions-item label="车系">{{ form.vehicle.vehicleSeries }}</el-descriptions-item>
-          <el-descriptions-item label="车架号">{{ form.vehicle.vin }}</el-descriptions-item>
-          <el-descriptions-item label="行驶证注册日期">{{ form.vehicle.registerDate }}</el-descriptions-item>
-          <el-descriptions-item label="检验有效期">{{ form.vehicle.inspectionExpired }}</el-descriptions-item>
+          <el-descriptions-item label="颜色">{{ selectedVehicle.color | colorFilter }}</el-descriptions-item>
+          <el-descriptions-item label="品牌">{{ selectedVehicle.type.brand }}</el-descriptions-item>
+          <el-descriptions-item label="车系">{{ selectedVehicle.type.series }}</el-descriptions-item>
+          <el-descriptions-item label="车架号">{{ selectedVehicle.vin }}</el-descriptions-item>
+          <el-descriptions-item label="行驶证注册日期">{{ selectedVehicle.certificate.registerDate }}</el-descriptions-item>
+          <el-descriptions-item label="检验有效期">{{ selectedVehicle.certificate.inspectionDate }}</el-descriptions-item>
         </el-descriptions>
         <el-divider content-position="center">合同内容</el-divider>
         <el-form-item label="平台">
-          <el-radio-group v-model="form.platform" size="small">
-            <el-radio-button :label="0" :value="0">滴滴</el-radio-button> />
-            <el-radio-button :label="1" :value="1">美团</el-radio-button> />
-            <el-radio-button :label="2" :value="2" disabled>享道</el-radio-button> />
-            <el-radio-button :label="3" :value="3" disabled>T3</el-radio-button> />
+          <el-radio-group v-model="formData.platform" size="small">
+            <el-radio-button label="ALL">不限</el-radio-button>
+            <el-radio-button label="DIDI">滴滴</el-radio-button>
+            <el-radio-button label="MEITUAN">美团</el-radio-button>
+            <el-radio-button label="XIANGDAO" disabled>享道</el-radio-button>
+            <el-radio-button label="T3" disabled>T3</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="签订日期">
           <el-date-picker
-            v-model="form.signingDate"
+            v-model="formData.signingDate"
             placeholder="选择日期"
+            value-format="yyyy-MM-dd"
             align="right"
             :picker-options="pickerOptions"
           />
         </el-form-item>
         <el-form-item label="合同期限">
           <el-date-picker
-            v-model="form.contrastDate"
+            v-model="contrastDate"
+            value-format="yyyy-MM-dd"
             type="daterange"
             align="right"
             unlink-panels
@@ -117,26 +123,27 @@
             start-placeholder="开始日期"
             end-placeholder="结束日期"
             :picker-options="pickerOptions2"
+            @change="handlePickContrastDateRange"
           />
         </el-form-item>
         <el-form-item label="支付周期">
-          <el-radio-group v-model="form.paymentPeriod" size="small">
-            <el-radio-button :value="0" :label="0">月付</el-radio-button>/>
-            <el-radio-button :value="1" :label="1">周付</el-radio-button>/>
-            <el-radio-button :value="2" :label="2" disabled>月付（首月周付）</el-radio-button>/>
+          <el-radio-group v-model="formData.paymentPeriod" size="small" @change="handlePeriodChange">
+            <el-radio-button label="MONTHLY">月付</el-radio-button>/>
+            <el-radio-button label="WEEKLY">周付</el-radio-button>/>
+<!--            <el-radio-button :label="" disabled>月付（首月周付）</el-radio-button>/>-->
           </el-radio-group>
         </el-form-item>
         <el-form-item label="押金">
-          <el-input v-model="form.deposit" style="width:200px">
+          <el-input v-model="formData.deposit" style="width:200px">
             <template #append>
               元
             </template>
           </el-input>
         </el-form-item>
         <el-form-item label="租金">
-          <el-input v-model="form.rent" style="width:200px">
+          <el-input v-model="formData.rent" style="width:200px">
             <template #append>
-              {{ form.paymentPeriod | paymentFilter }}
+              {{ formData.paymentPeriod | paymentFilter }}
             </template>
           </el-input>
         </el-form-item>
@@ -159,6 +166,9 @@
 import { getDriverList } from '@/api/hailing/driver'
 import { getVehicleList } from '@/api/hailing/vehicle'
 import { colorFilter, paymentFilter, resultMap } from '@/filters'
+import { driverTemplate, vehicleTemplate } from '@/utils/template'
+import { Message } from 'element-ui'
+import { submitContrast } from '@/api/hailing/contrast'
 // 计算合同终止日，若过了每月月中则拉到月底，否则终止日为输入的相应月数再减1天
 function computeEndDate(start, months) {
   const end = new Date(start)
@@ -172,9 +182,6 @@ function computeEndDate(start, months) {
 }
 export default {
   computed: {
-    resultMap() {
-      return resultMap
-    }
   },
   filters: {
     colorFilter,
@@ -182,27 +189,26 @@ export default {
   },
   data() {
     return {
+      oldPaymentPeriod: '',
       step: 1,
-      form: {
-        driver: {
-          id: ''
-        },
-        vehicle: {
-          id: ''
-        },
-        paymentPlan: [],
-        platform: 0,
+      formData: {
+        driver: '',
+        vehicle: '',
+        platform: 'DIDI',
         signingDate: '',
-        paymentPeriod: 0,
+        paymentPeriod: 'MONTHLY',
         deposit: null,
         rent: null
       },
+      selectedDriver: driverTemplate,
+      selectedVehicle: vehicleTemplate,
       driverList: [],
-      options: [],
+      driverOptions: [],
       driverLoading: false,
       vehicleList: [],
-      options2: [],
+      vehicleOptions: [],
       vehicleLoading: false,
+      contrastDate: [],
       pickerOptions: {
         disabledDate(time) {
           return time.getTime() > Date.now()
@@ -228,7 +234,6 @@ export default {
           }
         }]
       },
-      contrastDate: [],
       pickerOptions2: {
         shortcuts: [{
           text: '三个月',
@@ -262,24 +267,18 @@ export default {
   mounted() {
   },
   methods: {
-    colorFilter,
     onSubmit() {
       console.log('submit!')
     },
-    remoteMethod(query) {
+    fetchDriverOptions(query) {
       if (query !== '') {
         this.driverLoading = true
-        getDriverList().then((resp) => {
-          this.driverList = resp.data.items
-          this.options = resp.data.items
-            .map((driver) => { return { value: driver.id, label: driver.name, identificationNo: driver.identificationNo } })
-            .filter((item) => { return item.label.includes(query) })
-          console.log(this.driverList)
-          console.log(this.options)
+        getDriverList({ name: query }).then((resp) => {
+          this.driverOptions = resp.data.results
           this.driverLoading = false
         })
       } else {
-        this.options = []
+        this.driverOptions = []
       }
     },
     handleClose(done) {
@@ -300,58 +299,71 @@ export default {
         .catch(_ => {
         })
     },
-    handleSelect() {
+    handleSelectDriver() {
       console.log('driver selected!')
-      for (const driverListKey in this.driverList) {
-        if (this.form.driver.id === this.driverList[driverListKey].id) {
-          this.form.driver = this.driverList[driverListKey]
+      for (const driverListKey in this.driverOptions) {
+        if (this.formData.driver === this.driverOptions[driverListKey].id) {
+          this.selectedDriver = this.driverOptions[driverListKey]
           break
         }
       }
     },
-    handleClear() {
-      this.form.driver = {}
+    handleDriverClear() {
+      this.formData.driver = ''
+      this.selectedDriver = driverTemplate
+      this.driverOptions = []
     },
-    remoteMethod2(query) {
+    fetchVehicleOptions(query) {
       if (query !== '') {
-        query = query.toLowerCase()
+        query = query.toUpperCase()
         this.vehicleLoading = true
-        getVehicleList().then((resp) => {
-          this.vehicleList = resp.data.items
-          this.options2 = resp.data.items
-            .filter((item) => {
-              if (item.licence.toLowerCase().includes(query)) {
-                return true
-              }
-              if (item.brand.toLowerCase().includes(query)) {
-                return true
-              }
-              if (item.vehicleSeries.toLowerCase().includes(query)) {
-                return true
-              }
-            })
-          console.log(this.vehicleList)
-          console.log(this.options2)
+        getVehicleList({ licenceNo: query }).then((resp) => {
+          this.vehicleOptions = resp.data.results
           this.vehicleLoading = false
         })
       } else {
-        this.options2 = []
+        this.vehicleOptions = []
       }
     },
-    handleSelect2() {
+    handleSelectVehicle() {
       console.log('vehicle selected!')
-      for (const vehicleListKey in this.vehicleList) {
-        if (this.form.vehicle.id === this.vehicleList[vehicleListKey].id) {
-          this.form.vehicle = this.vehicleList[vehicleListKey]
-          console.log(this.form.vehicle)
+      for (const vehicleListKey in this.vehicleOptions) {
+        if (this.formData.vehicle === this.vehicleOptions[vehicleListKey].id) {
+          this.selectedVehicle = this.vehicleOptions[vehicleListKey]
           break
         }
       }
     },
-    handleClear2() {
-      this.form.vehicle = {}
+    handleVehicleClear() {
+      this.formData.vehicle = ''
+      this.selectedVehicle = vehicleTemplate
+      this.vehicleOptions = []
+    },
+    handlePeriodChange() {
+      const oldValue = this.oldPaymentPeriod
+      const newValue = this.formData.paymentPeriod
+      this.oldPaymentPeriod = newValue
+      if (this.formData.rent !== '') {
+        if (oldValue === 0 && newValue === 1) {
+          this.formData.rent /= 4
+        } else if (oldValue === 1 && newValue === 0) {
+          this.formData.rent *= 4
+        }
+      }
+    },
+    handlePickContrastDateRange() {
+      if (this.contrastDate.length > 1) {
+        this.formData.startDate = this.contrastDate[0]
+        this.formData.endDate = this.contrastDate[1]
+      } else {
+        this.formData.startDate = ''
+        this.formData.endDate = ''
+      }
     },
     handleSubmit() {
+      submitContrast(this.formData).then(() => {
+        Message.success('提交合同成功')
+      })
       this.step += 1
     }
 
@@ -389,8 +401,8 @@ export default {
 }
 .vehicle-select {
   li {
-    //height: 50px;
-    line-height: 0.75;
+    height: 150%;
+    line-height: 1.5;
     padding: 7px;
     .licence {
       text-overflow: ellipsis;

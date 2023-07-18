@@ -116,6 +116,12 @@ export const constantRoutes = [
           }
         ],
         meta: { title: '租赁合同管理', icon: 'el-icon-document' }
+      },
+      {
+        path: 'business',
+        name: 'Business',
+        component: () => import('@/views/hailing/business/entry/index'),
+        meta: { title: '业务录入', icon: 'el-icon-document-add' }
       }
     ]
   },

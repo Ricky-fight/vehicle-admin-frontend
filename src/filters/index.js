@@ -54,3 +54,50 @@ export function resultFilter(result) {
   return resultMap[result]
 }
 
+export const platformMap = {
+  'ALL': '不限',
+  'DIDI': '滴滴',
+  'MEITUAN': '美团',
+  'XIANGDAO': '享道',
+  'T3': 'T3',
+  'AA': 'AA',
+  'CAOCAO': '曹操'
+}
+export function convertMap2Options(map) {
+  const options = []
+  for (const key in map) {
+    options.push({ value: key, label: map[key] })
+  }
+  return options
+}
+
+export function platformFilter(platform) {
+  return platformMap[platform]
+}
+
+export const contrastStatusMap = {
+  'DRAFT': '草稿',
+  'ACTIVE': '生效中',
+  'TERMINATED': '已终止'
+}
+export function contrastStatusFilter(status) {
+  return contrastStatusMap[status]
+}
+export const contrastStatusTagTypeMap = {
+  'DRAFT': 'gray',
+  'ACTIVE': 'success',
+  'TERMINATED': 'danger'
+}
+export function contrastStatusTagType(status) {
+  return contrastStatusTagTypeMap[status]
+}
+export const paymentPeriodMap = {
+  'MONTHLY': '月付',
+  'WEEKLY': '周付'
+}
+
+export function paymentPeriodFilter(paymentPeriod) {
+  return paymentPeriodMap[paymentPeriod]
+}
+
+export const paymentPeriodOptions = convertMap2Options(paymentPeriodMap)

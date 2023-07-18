@@ -388,7 +388,7 @@ export default {
             default:
               break
           }
-          this.drawerVisible = false
+          this.dialogVisible = false
         }
       })
     },
